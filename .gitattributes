@@ -1,0 +1,18 @@
+# Ensure GitHub classifies this repository as Python
+*.py linguist-language=Python
+
+# Exclude HTML files from language detection (they're just output files)
+*.html linguist-vendored
+results/*.html linguist-vendored
+
+# Mark data files as vendored to reduce noise
+*.csv linguist-vendored
+*.yaml linguist-vendored
+*.yml linguist-vendored
+
+# Mark documentation as documentation
+*.md linguist-documentation
+README.md linguist-documentation
+
+# Mark requirements file as Python
+requirements.txt linguist-language=Python 
