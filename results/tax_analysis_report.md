@@ -1,6 +1,6 @@
 # Tax Policy Analysis Report (Real Data)
 
-Generated: 2025-07-11 16:29:28
+Generated: 2025-07-11 16:51:01
 
 This report contains comprehensive analysis of tax policies using real OECD data from actual countries.
 
@@ -26,35 +26,35 @@ Total Records: 30
 
 | Metric | Value                |
 | ------ | -------------------- |
-| Mean   | 36.4% of GDP         |
-| Median | 36.3% of GDP         |
-| Range  | 21.5% - 49.5% of GDP |
+| Mean   | 32.6% of GDP         |
+| Median | 31.2% of GDP         |
+| Range  | 20.2% - 49.0% of GDP |
 
 ## Personal Tax Rates
 
 | Metric          | Value         |
 | --------------- | ------------- |
-| Mean Top Rate   | 43.0%         |
-| Median Top Rate | 42.4%         |
-| Range           | 30.9% - 59.0% |
+| Mean Top Rate   | 42.6%         |
+| Median Top Rate | 39.3%         |
+| Range           | 30.3% - 58.3% |
 
 ## Corporate Tax Rates
 
 | Metric                | Value         |
 | --------------------- | ------------- |
-| Mean Corporate Rate   | 25.0%         |
-| Median Corporate Rate | 27.4%         |
-| Range                 | 15.3% - 35.0% |
+| Mean Corporate Rate   | 23.6%         |
+| Median Corporate Rate | 22.3%         |
+| Range                 | 15.1% - 34.5% |
 
 ## Country Comparison (Latest Year)
 
 | Country | Tax Revenue (% GDP) | Top Personal Rate (%) | Corporate Rate (%) |
 | ------- | ------------------- | --------------------- | ------------------ |
-| France  | 21.7%               | 48.6%                 | 15.4%              |
-| Germany | 46.5%               | 43.4%                 | 15.5%              |
-| Japan   | 39.9%               | 50.0%                 | 22.7%              |
-| UK      | 35.5%               | 58.3%                 | 23.4%              |
-| USA     | 35.0%               | 34.0%                 | 30.0%              |
+| France  | 24.2%               | 34.5%                 | 33.0%              |
+| Germany | 26.9%               | 41.1%                 | 24.2%              |
+| Japan   | 42.0%               | 47.6%                 | 29.5%              |
+| UK      | 21.2%               | 49.7%                 | 22.8%              |
+| USA     | 33.3%               | 46.1%                 | 30.3%              |
 
 # Real Data Tax Policy Analysis
 
@@ -70,31 +70,31 @@ Total Records: 30
 
 | Policy                               | Rate Structure                                                 |
 | ------------------------------------ | -------------------------------------------------------------- |
-| France Progressive (48.6% top rate)  | $0-$30,000: 12.1%, $30,000-$60,000: 24.3%, $60,000-$inf: 48.6% |
-| France Flat Tax (18.4%)              | 18.4%                                                          |
-| Germany Progressive (43.4% top rate) | $0-$30,000: 10.9%, $30,000-$60,000: 21.7%, $60,000-$inf: 43.4% |
-| Germany Flat Tax (18.4%)             | 18.4%                                                          |
-| Japan Progressive (50.0% top rate)   | $0-$30,000: 12.5%, $30,000-$60,000: 25.0%, $60,000-$inf: 50.0% |
-| Japan Flat Tax (18.4%)               | 18.4%                                                          |
-| UK Progressive (58.3% top rate)      | $0-$30,000: 14.6%, $30,000-$60,000: 29.2%, $60,000-$inf: 58.3% |
-| UK Flat Tax (18.4%)                  | 18.4%                                                          |
-| USA Progressive (34.0% top rate)     | $0-$40,000: 10.2%, $40,000-$80,000: 20.4%, $80,000-$inf: 34.0% |
-| USA Flat Tax (18.4%)                 | 18.4%                                                          |
+| France Progressive (34.5% top rate)  | $0-$40,000: 10.3%, $40,000-$80,000: 20.7%, $80,000-$inf: 34.5% |
+| France Flat Tax (17.8%)              | 17.8%                                                          |
+| Germany Progressive (41.1% top rate) | $0-$30,000: 10.3%, $30,000-$60,000: 20.5%, $60,000-$inf: 41.1% |
+| Germany Flat Tax (17.8%)             | 17.8%                                                          |
+| Japan Progressive (47.6% top rate)   | $0-$30,000: 11.9%, $30,000-$60,000: 23.8%, $60,000-$inf: 47.6% |
+| Japan Flat Tax (17.6%)               | 17.6%                                                          |
+| UK Progressive (49.7% top rate)      | $0-$30,000: 12.4%, $30,000-$60,000: 24.8%, $60,000-$inf: 49.7% |
+| UK Flat Tax (17.8%)                  | 17.8%                                                          |
+| USA Progressive (46.1% top rate)     | $0-$30,000: 11.5%, $30,000-$60,000: 23.1%, $60,000-$inf: 46.1% |
+| USA Flat Tax (17.8%)                 | 17.8%                                                          |
 
 ## 3. Revenue Calculations
 
 | Policy                               | Total Revenue   | Revenue per Capita | Average Tax Rate |
 | ------------------------------------ | --------------- | ------------------ | ---------------- |
-| France Progressive (48.6% top rate)  | $12,711,642,694 | $12,712            | 24.7%            |
-| France Flat Tax (18.4%)              | $9,458,432,621  | $9,459             | 18.4%            |
-| Germany Progressive (43.4% top rate) | $11,363,230,642 | $11,363            | 22.1%            |
-| Germany Flat Tax (18.4%)             | $9,458,432,621  | $9,459             | 18.4%            |
-| Japan Progressive (50.0% top rate)   | $13,083,670,311 | $13,084            | 25.4%            |
-| Japan Flat Tax (18.4%)               | $9,458,432,621  | $9,459             | 18.4%            |
-| UK Progressive (58.3% top rate)      | $15,262,718,988 | $15,263            | 29.7%            |
-| UK Flat Tax (18.4%)                  | $9,458,432,621  | $9,459             | 18.4%            |
-| USA Progressive (34.0% top rate)     | $8,507,712,997  | $8,508             | 16.5%            |
-| USA Flat Tax (18.4%)                 | $9,458,432,621  | $9,459             | 18.4%            |
+| France Progressive (34.5% top rate)  | $8,624,505,064  | $8,625             | 16.8%            |
+| France Flat Tax (17.8%)              | $9,157,940,422  | $9,158             | 17.8%            |
+| Germany Progressive (41.1% top rate) | $10,743,677,591 | $10,744            | 20.9%            |
+| Germany Flat Tax (17.8%)             | $9,157,940,422  | $9,158             | 17.8%            |
+| Japan Progressive (47.6% top rate)   | $12,461,945,038 | $12,462            | 24.2%            |
+| Japan Flat Tax (17.6%)               | $9,076,523,344  | $9,077             | 17.6%            |
+| UK Progressive (49.7% top rate)      | $12,998,860,064 | $12,999            | 25.3%            |
+| UK Flat Tax (17.8%)                  | $9,157,940,422  | $9,158             | 17.8%            |
+| USA Progressive (46.1% top rate)     | $12,069,684,719 | $12,070            | 23.5%            |
+| USA Flat Tax (17.8%)                 | $9,157,940,422  | $9,158             | 17.8%            |
 
 ## 4. Policy Comparison
 
@@ -102,46 +102,46 @@ Total Records: 30
 
 | Policy                               | Average Effective Rate | Total Tax Revenue | Tax per Capita |
 | ------------------------------------ | ---------------------- | ----------------- | -------------- |
-| France Progressive (48.6% top rate)  | 12.1%                  | $591,612,643      | $1,762         |
-| France Progressive (48.6% top rate)  | 13.7%                  | $1,066,602,004    | $4,738         |
-| France Progressive (48.6% top rate)  | 22.1%                  | $4,217,861,445    | $14,578        |
-| France Progressive (48.6% top rate)  | 34.7%                  | $6,835,566,602    | $45,656        |
-| France Flat Tax (18.4%)              | 18.4%                  | $895,584,956      | $2,667         |
-| France Flat Tax (18.4%)              | 18.4%                  | $1,428,269,780    | $6,345         |
-| France Flat Tax (18.4%)              | 18.4%                  | $3,515,181,389    | $12,150        |
-| France Flat Tax (18.4%)              | 18.4%                  | $3,619,396,496    | $24,175        |
-| Germany Progressive (43.4% top rate) | 10.9%                  | $528,856,190      | $1,575         |
-| Germany Progressive (43.4% top rate) | 12.3%                  | $953,460,136      | $4,235         |
-| Germany Progressive (43.4% top rate) | 19.7%                  | $3,770,443,646    | $13,032        |
-| Germany Progressive (43.4% top rate) | 31.0%                  | $6,110,470,671    | $40,813        |
-| Germany Flat Tax (18.4%)             | 18.4%                  | $895,584,956      | $2,667         |
-| Germany Flat Tax (18.4%)             | 18.4%                  | $1,428,269,780    | $6,345         |
-| Germany Flat Tax (18.4%)             | 18.4%                  | $3,515,181,389    | $12,150        |
-| Germany Flat Tax (18.4%)             | 18.4%                  | $3,619,396,496    | $24,175        |
-| Japan Progressive (50.0% top rate)   | 12.5%                  | $608,927,183      | $1,813         |
-| Japan Progressive (50.0% top rate)   | 14.1%                  | $1,097,817,906    | $4,877         |
-| Japan Progressive (50.0% top rate)   | 22.7%                  | $4,341,304,259    | $15,005        |
-| Japan Progressive (50.0% top rate)   | 35.7%                  | $7,035,620,963    | $46,992        |
-| Japan Flat Tax (18.4%)               | 18.4%                  | $895,584,956      | $2,667         |
-| Japan Flat Tax (18.4%)               | 18.4%                  | $1,428,269,780    | $6,345         |
-| Japan Flat Tax (18.4%)               | 18.4%                  | $3,515,181,389    | $12,150        |
-| Japan Flat Tax (18.4%)               | 18.4%                  | $3,619,396,496    | $24,175        |
-| UK Progressive (58.3% top rate)      | 14.6%                  | $710,342,302      | $2,115         |
-| UK Progressive (58.3% top rate)      | 16.5%                  | $1,280,656,406    | $5,689         |
-| UK Progressive (58.3% top rate)      | 26.5%                  | $5,064,336,335    | $17,504        |
-| UK Progressive (58.3% top rate)      | 41.7%                  | $8,207,383,945    | $54,819        |
-| UK Flat Tax (18.4%)                  | 18.4%                  | $895,584,956      | $2,667         |
-| UK Flat Tax (18.4%)                  | 18.4%                  | $1,428,269,780    | $6,345         |
-| UK Flat Tax (18.4%)                  | 18.4%                  | $3,515,181,389    | $12,150        |
-| UK Flat Tax (18.4%)                  | 18.4%                  | $3,619,396,496    | $24,175        |
-| USA Progressive (34.0% top rate)     | 10.2%                  | $496,572,586      | $1,479         |
-| USA Progressive (34.0% top rate)     | 10.2%                  | $791,928,910      | $3,518         |
-| USA Progressive (34.0% top rate)     | 14.5%                  | $2,768,754,639    | $9,570         |
-| USA Progressive (34.0% top rate)     | 22.6%                  | $4,450,456,862    | $29,725        |
-| USA Flat Tax (18.4%)                 | 18.4%                  | $895,584,956      | $2,667         |
-| USA Flat Tax (18.4%)                 | 18.4%                  | $1,428,269,780    | $6,345         |
-| USA Flat Tax (18.4%)                 | 18.4%                  | $3,515,181,389    | $12,150        |
-| USA Flat Tax (18.4%)                 | 18.4%                  | $3,619,396,496    | $24,175        |
+| France Progressive (34.5% top rate)  | 10.3%                  | $503,389,428      | $1,499         |
+| France Progressive (34.5% top rate)  | 10.3%                  | $802,800,341      | $3,566         |
+| France Progressive (34.5% top rate)  | 14.7%                  | $2,806,763,512    | $9,701         |
+| France Progressive (34.5% top rate)  | 22.9%                  | $4,511,551,784    | $30,133        |
+| France Flat Tax (17.8%)              | 17.8%                  | $867,132,431      | $2,582         |
+| France Flat Tax (17.8%)              | 17.8%                  | $1,382,893,982    | $6,143         |
+| France Flat Tax (17.8%)              | 17.8%                  | $3,403,504,896    | $11,764        |
+| France Flat Tax (17.8%)              | 17.8%                  | $3,504,409,113    | $23,407        |
+| Germany Progressive (41.1% top rate) | 10.3%                  | $500,021,567      | $1,489         |
+| Germany Progressive (41.1% top rate) | 11.6%                  | $901,474,996      | $4,005         |
+| Germany Progressive (41.1% top rate) | 18.6%                  | $3,564,869,198    | $12,321        |
+| Germany Progressive (41.1% top rate) | 29.4%                  | $5,777,311,831    | $38,588        |
+| Germany Flat Tax (17.8%)             | 17.8%                  | $867,132,431      | $2,582         |
+| Germany Flat Tax (17.8%)             | 17.8%                  | $1,382,893,982    | $6,143         |
+| Germany Flat Tax (17.8%)             | 17.8%                  | $3,403,504,896    | $11,764        |
+| Germany Flat Tax (17.8%)             | 17.8%                  | $3,504,409,113    | $23,407        |
+| Japan Progressive (47.6% top rate)   | 11.9%                  | $579,991,463      | $1,727         |
+| Japan Progressive (47.6% top rate)   | 13.5%                  | $1,045,650,501    | $4,645         |
+| Japan Progressive (47.6% top rate)   | 21.6%                  | $4,135,009,044    | $14,292        |
+| Japan Progressive (47.6% top rate)   | 34.0%                  | $6,701,294,030    | $44,759        |
+| Japan Flat Tax (17.6%)               | 17.6%                  | $859,423,341      | $2,559         |
+| Japan Flat Tax (17.6%)               | 17.6%                  | $1,370,599,603    | $6,088         |
+| Japan Flat Tax (17.6%)               | 17.6%                  | $3,373,246,627    | $11,659        |
+| Japan Flat Tax (17.6%)               | 17.6%                  | $3,473,253,773    | $23,198        |
+| UK Progressive (49.7% top rate)      | 12.4%                  | $604,980,029      | $1,801         |
+| UK Progressive (49.7% top rate)      | 14.0%                  | $1,090,701,692    | $4,845         |
+| UK Progressive (49.7% top rate)      | 22.6%                  | $4,313,163,296    | $14,908        |
+| UK Progressive (49.7% top rate)      | 35.5%                  | $6,990,015,048    | $46,688        |
+| UK Flat Tax (17.8%)                  | 17.8%                  | $867,132,431      | $2,582         |
+| UK Flat Tax (17.8%)                  | 17.8%                  | $1,382,893,982    | $6,143         |
+| UK Flat Tax (17.8%)                  | 17.8%                  | $3,403,504,896    | $11,764        |
+| UK Flat Tax (17.8%)                  | 17.8%                  | $3,504,409,113    | $23,407        |
+| USA Progressive (46.1% top rate)     | 11.5%                  | $561,735,273      | $1,673         |
+| USA Progressive (46.1% top rate)     | 13.0%                  | $1,012,736,923    | $4,499         |
+| USA Progressive (46.1% top rate)     | 21.0%                  | $4,004,852,800    | $13,842        |
+| USA Progressive (46.1% top rate)     | 33.0%                  | $6,490,359,723    | $43,350        |
+| USA Flat Tax (17.8%)                 | 17.8%                  | $867,132,431      | $2,582         |
+| USA Flat Tax (17.8%)                 | 17.8%                  | $1,382,893,982    | $6,143         |
+| USA Flat Tax (17.8%)                 | 17.8%                  | $3,403,504,896    | $11,764        |
+| USA Flat Tax (17.8%)                 | 17.8%                  | $3,504,409,113    | $23,407        |
 
 ## 5. Visualizations
 
@@ -150,8 +150,8 @@ Interactive tax burden comparison chart: [real_data_tax_burden_comparison.html](
 ## Real Data Insights
 
 - Analysis based on 5 countries in 2023
-- Average tax revenue across countries: 35.7% of GDP
-- Average top personal tax rate: 46.9%
-- Average corporate tax rate: 21.4%
-- Countries with highest tax revenue: Germany, Japan, UK
-- Countries with lowest tax revenue: France, USA, UK
+- Average tax revenue across countries: 29.5% of GDP
+- Average top personal tax rate: 43.8%
+- Average corporate tax rate: 27.9%
+- Countries with highest tax revenue: Japan, USA, Germany
+- Countries with lowest tax revenue: UK, France, Germany
