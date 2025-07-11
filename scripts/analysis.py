@@ -48,29 +48,71 @@ class ReportGenerator:
         self.report_content.append(f"{'#' * level} {title}\n")
     
     def add_table(self, data, headers=None):
-        """Add a table to the report."""
+        """Add a table to the report with proper spacing for fixed-width columns."""
         if isinstance(data, pd.DataFrame):
             # Convert DataFrame to markdown table
             if headers is None:
                 headers = data.columns.tolist()
             
-            # Add header row
-            self.report_content.append("| " + " | ".join(str(h) for h in headers) + " |")
-            self.report_content.append("| " + " | ".join(["---"] * len(headers)) + " |")
+            # Convert all data to strings and find maximum width for each column
+            all_rows = [headers] + [[str(val) for val in row] for _, row in data.iterrows()]
             
-            # Add data rows
+            # Calculate column widths
+            col_widths = []
+            for col_idx in range(len(headers)):
+                max_width = max(len(str(row[col_idx])) for row in all_rows)
+                col_widths.append(max_width)
+            
+            # Create header row with proper spacing
+            header_cells = []
+            for i, header in enumerate(headers):
+                header_cells.append(f" {header:<{col_widths[i]}} ")
+            self.report_content.append("|" + "|".join(header_cells) + "|")
+            
+            # Create separator row
+            separator_cells = []
+            for width in col_widths:
+                separator_cells.append(" " + "-" * width + " ")
+            self.report_content.append("|" + "|".join(separator_cells) + "|")
+            
+            # Add data rows with proper spacing
             for _, row in data.iterrows():
-                self.report_content.append("| " + " | ".join(str(val) for val in row) + " |")
+                data_cells = []
+                for i, val in enumerate(row):
+                    data_cells.append(f" {str(val):<{col_widths[i]}} ")
+                self.report_content.append("|" + "|".join(data_cells) + "|")
+            
             self.report_content.append("")
         else:
             # Handle list of lists
             if headers:
-                self.report_content.append("| " + " | ".join(str(h) for h in headers) + " |")
-                self.report_content.append("| " + " | ".join(["---"] * len(headers)) + " |")
-            
-            for row in data:
-                self.report_content.append("| " + " | ".join(str(val) for val in row) + " |")
-            self.report_content.append("")
+                # Calculate column widths
+                all_rows = [headers] + data
+                col_widths = []
+                for col_idx in range(len(headers)):
+                    max_width = max(len(str(row[col_idx])) for row in all_rows)
+                    col_widths.append(max_width)
+                
+                # Create header row with proper spacing
+                header_cells = []
+                for i, header in enumerate(headers):
+                    header_cells.append(f" {header:<{col_widths[i]}} ")
+                self.report_content.append("|" + "|".join(header_cells) + "|")
+                
+                # Create separator row
+                separator_cells = []
+                for width in col_widths:
+                    separator_cells.append(" " + "-" * width + " ")
+                self.report_content.append("|" + "|".join(separator_cells) + "|")
+                
+                # Add data rows with proper spacing
+                for row in data:
+                    data_cells = []
+                    for i, val in enumerate(row):
+                        data_cells.append(f" {str(val):<{col_widths[i]}} ")
+                    self.report_content.append("|" + "|".join(data_cells) + "|")
+                
+                self.report_content.append("")
     
     def add_list(self, items, ordered=False):
         """Add a list to the report."""
@@ -122,13 +164,14 @@ def analyze_oecd_data(analysis_data, report_gen):
         
         revenue_stats = analysis_data['total_tax_revenue'].describe()
         revenue_summary = {
-            "Mean": f"{revenue_stats['mean']:.1f}% of GDP",
-            "Median": f"{revenue_stats['50%']:.1f}% of GDP",
-            "Range": f"{revenue_stats['min']:.1f}% - {revenue_stats['max']:.1f}% of GDP"
+            "Metric": ["Mean", "Median", "Range"],
+            "Value": [
+                f"{revenue_stats['mean']:.1f}% of GDP",
+                f"{revenue_stats['50%']:.1f}% of GDP",
+                f"{revenue_stats['min']:.1f}% - {revenue_stats['max']:.1f}% of GDP"
+            ]
         }
-        
-        for key, value in revenue_summary.items():
-            report_gen.add_text(f"**{key}:** {value}")
+        report_gen.add_table(pd.DataFrame(revenue_summary))
     
     # Tax rates analysis
     if 'top_personal_rate' in analysis_data.columns:
@@ -136,13 +179,14 @@ def analyze_oecd_data(analysis_data, report_gen):
         
         rate_stats = analysis_data['top_personal_rate'].describe()
         rate_summary = {
-            "Mean Top Rate": f"{rate_stats['mean']:.1f}%",
-            "Median Top Rate": f"{rate_stats['50%']:.1f}%",
-            "Range": f"{rate_stats['min']:.1f}% - {rate_stats['max']:.1f}%"
+            "Metric": ["Mean Top Rate", "Median Top Rate", "Range"],
+            "Value": [
+                f"{rate_stats['mean']:.1f}%",
+                f"{rate_stats['50%']:.1f}%",
+                f"{rate_stats['min']:.1f}% - {rate_stats['max']:.1f}%"
+            ]
         }
-        
-        for key, value in rate_summary.items():
-            report_gen.add_text(f"**{key}:** {value}")
+        report_gen.add_table(pd.DataFrame(rate_summary))
     
     # Corporate tax rates analysis
     if 'corporate_rate' in analysis_data.columns:
@@ -150,13 +194,14 @@ def analyze_oecd_data(analysis_data, report_gen):
         
         corp_stats = analysis_data['corporate_rate'].describe()
         corp_summary = {
-            "Mean Corporate Rate": f"{corp_stats['mean']:.1f}%",
-            "Median Corporate Rate": f"{corp_stats['50%']:.1f}%",
-            "Range": f"{corp_stats['min']:.1f}% - {corp_stats['max']:.1f}%"
+            "Metric": ["Mean Corporate Rate", "Median Corporate Rate", "Range"],
+            "Value": [
+                f"{corp_stats['mean']:.1f}%",
+                f"{corp_stats['50%']:.1f}%",
+                f"{corp_stats['min']:.1f}% - {corp_stats['max']:.1f}%"
+            ]
         }
-        
-        for key, value in corp_summary.items():
-            report_gen.add_text(f"**{key}:** {value}")
+        report_gen.add_table(pd.DataFrame(corp_summary))
     
     # Country comparison
     report_gen.add_subsection("Country Comparison (Latest Year)")
@@ -387,14 +432,15 @@ def main():
     parser.add_argument('--data-file', type=str, default='data/processed/analysis_ready_data.csv',
                        help='Path to analysis-ready data file (default: data/processed/analysis_ready_data.csv)')
     parser.add_argument('--output', type=str, default='tax_analysis_report.md',
-                       help='Output filename for the markdown report (default: tax_analysis_report.md)')
+                       help='Output filename for the CSV report (default: tax_analysis_report.csv)')
     
     args = parser.parse_args()
     
     # Initialize report generator
     report_gen = ReportGenerator()
-    report_gen.add_header("Tax Policy Analysis Report (Real Data)")
-    report_gen.add_text(f"**Generated:** {report_gen.timestamp}")
+    
+    report_gen.add_header("Tax Policy Analysis Report (Real Data)", level=1)
+    report_gen.add_text(f"Generated: {report_gen.timestamp}")
     report_gen.add_text("This report contains comprehensive analysis of tax policies using real OECD data from actual countries.")
     
     # Load OECD data if available
@@ -403,6 +449,13 @@ def main():
         try:
             analysis_data = pd.read_csv(args.data_file)
             print(f"Loaded OECD data: {len(analysis_data)} records")
+            
+            # Update summary with actual data info
+            if not analysis_data.empty:
+                report_gen.add_text(f"Data Source: {args.data_file}")
+                report_gen.add_text(f"Countries Analyzed: {analysis_data['country'].nunique()}")
+                report_gen.add_text(f"Years Covered: {analysis_data['year'].min()} - {analysis_data['year'].max()}")
+                report_gen.add_text(f"Total Records: {len(analysis_data)}")
         except Exception as e:
             print(f"Error loading OECD data: {e}")
             analysis_data = None
@@ -419,7 +472,7 @@ def main():
             analyze_oecd_data(analysis_data, report_gen)
         except Exception as e:
             print(f"Error during OECD analysis: {e}")
-            report_gen.add_text(f"**Error during OECD analysis:** {e}")
+            report_gen.add_text(f"OECD Analysis Failed: {e}")
     
     # Run real data analysis if type is 'real' or 'both'
     if args.type in ['real', 'both']:
@@ -427,9 +480,9 @@ def main():
             real_data_analysis(analysis_data, report_gen)
         except Exception as e:
             print(f"Error during real data analysis: {e}")
-            report_gen.add_text(f"**Error during real data analysis:** {e}")
+            report_gen.add_text(f"Real Data Analysis Failed: {e}")
     
-    # Save the complete report
+    # Save the complete report as CSV
     report_gen.save_report(args.output)
 
 
