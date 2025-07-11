@@ -1,6 +1,6 @@
 # Tax Policy Analysis Tool
 
-A comprehensive Python-based tool for analyzing tax policies and their revenue implications using real OECD data.
+A Python-based tool for analyzing tax policies and their revenue implications using real OECD data.
 
 ## Features
 
@@ -167,9 +167,6 @@ This project is designed for tax policy research and analysis. Contributions are
 - Documentation improvements
 - Expanding country coverage
 
-## License
-
-MIT License - see LICENSE file for details. 
 
 # Todos: 
 sanity check results. france's tax rate really low, can it be possible
