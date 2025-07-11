@@ -1,5 +1,4 @@
-# Ignore the src library (imported library code)
-src/
+
 
 # Python
 __pycache__/
