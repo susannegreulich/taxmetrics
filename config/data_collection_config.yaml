@@ -1,0 +1,182 @@
+# Data Collection Configuration
+
+# OECD Data Collection Settings
+oecd:
+  api_key: null  # Set your OECD API key here if available
+  base_url: "https://stats.oecd.org/SDMX-JSON/data"
+  timeout: 30  # seconds
+  retry_attempts: 3
+  delay_between_requests: 1  # seconds
+
+# Default Countries to Collect
+countries:
+  # OECD Members
+  oecd_members:
+    - AUS  # Australia
+    - AUT  # Austria
+    - BEL  # Belgium
+    - CAN  # Canada
+    - CHL  # Chile
+    - COL  # Colombia
+    - CRI  # Costa Rica
+    - CZE  # Czech Republic
+    - DNK  # Denmark
+    - EST  # Estonia
+    - FIN  # Finland
+    - FRA  # France
+    - DEU  # Germany
+    - GRC  # Greece
+    - HUN  # Hungary
+    - ISL  # Iceland
+    - IRL  # Ireland
+    - ISR  # Israel
+    - ITA  # Italy
+    - JPN  # Japan
+    - KOR  # Korea
+    - LVA  # Latvia
+    - LTU  # Lithuania
+    - LUX  # Luxembourg
+    - MEX  # Mexico
+    - NLD  # Netherlands
+    - NZL  # New Zealand
+    - NOR  # Norway
+    - POL  # Poland
+    - PRT  # Portugal
+    - SVK  # Slovak Republic
+    - SVN  # Slovenia
+    - ESP  # Spain
+    - SWE  # Sweden
+    - CHE  # Switzerland
+    - TUR  # Turkey
+    - GBR  # United Kingdom
+    - USA  # United States
+  
+  # Major Non-OECD Countries
+  major_economies:
+    - BRA  # Brazil
+    - CHN  # China
+    - IND  # India
+    - IDN  # Indonesia
+    - RUS  # Russian Federation
+    - ZAF  # South Africa
+  
+  # Default selection for quick analysis
+  default_selection:
+    - USA  # United States
+    - GBR  # United Kingdom
+    - DEU  # Germany
+    - FRA  # France
+    - JPN  # Japan
+    - CAN  # Canada
+    - AUS  # Australia
+
+# Time Periods
+time_periods:
+  # Default years to collect
+  default_years: [2015, 2023]
+  
+  # Historical analysis (longer period)
+  historical_years: [1990, 2023]
+  
+  # Recent analysis (shorter period)
+  recent_years: [2018, 2023]
+  
+  # Annual updates
+  current_year: 2024
+
+# Data Sources
+data_sources:
+  revenue_statistics:
+    enabled: true
+    dataset_id: "REV"
+    description: "Tax revenue statistics as % of GDP"
+    source_url: "https://stats.oecd.org/index.aspx?DataSetCode=REV"
+  
+  tax_rates:
+    enabled: true
+    dataset_id: "TAXWAGE"
+    description: "Personal and corporate tax rates"
+    source_url: "https://stats.oecd.org/index.aspx?DataSetCode=TAXWAGE"
+  
+  tax_structures:
+    enabled: true
+    dataset_id: "TAX_STRUCT"
+    description: "Tax system structure information"
+    source_url: "https://stats.oecd.org/index.aspx?DataSetCode=TAX_STRUCT"
+
+# Data Validation Rules
+validation:
+  # Required columns for each dataset
+  required_columns:
+    revenue_statistics:
+      - country
+      - country_code
+      - year
+      - total_tax_revenue
+  
+    tax_rates:
+      - country
+      - country_code
+      - year
+      - top_personal_rate
+  
+    tax_structures:
+      - country
+      - country_code
+      - year
+  
+  # Data range validation
+  value_ranges:
+    total_tax_revenue: [0, 100]  # % of GDP
+    top_personal_rate: [0, 100]  # %
+    corporate_rate: [0, 100]  # %
+    vat_rate: [0, 100]  # %
+    social_security_rate: [0, 50]  # %
+
+# Output Settings
+output:
+  # Directory structure
+  base_directory: "data"
+  raw_data_directory: "data/oecd/raw"
+  processed_data_directory: "data/oecd/processed"
+  reports_directory: "data/oecd/reports"
+  
+  # File formats
+  csv_enabled: true
+  excel_enabled: true
+  json_enabled: false
+  
+  # File naming
+  timestamp_format: "%Y%m%d_%H%M%S"
+  include_timestamp: true
+  
+  # Data compression
+  compress_large_files: true
+  compression_threshold_mb: 10
+
+# Processing Options
+processing:
+  # Data cleaning
+  remove_duplicates: true
+  handle_missing_values: true
+  remove_outliers: true
+  outlier_method: "iqr"  # Options: iqr, zscore
+  
+  # Data transformation
+  standardize_country_names: true
+  add_derived_variables: true
+  create_analysis_ready_dataset: true
+  
+  # Summary statistics
+  generate_summaries: true
+  include_correlations: true
+  include_trends: true
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_logging: true
+  log_file: "logs/data_collection.log"
+  max_log_size_mb: 10
+  backup_count: 5 

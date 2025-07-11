@@ -1,0 +1,72 @@
+# Tax Analysis Configuration
+
+# Tax Base Settings (GDP and Income Distribution for Tax Analysis)
+tax_base:
+  population_size: 1000000
+  distribution_type: "lognormal"  # Options: lognormal, normal, exponential
+  lognormal_params:
+    mean: 10.5  # log of mean income
+    std: 0.6
+  normal_params:
+    mean: 50000
+    std: 20000
+  exponential_params:
+    scale: 50000
+
+# Default Tax Policies
+default_policies:
+  progressive_us:
+    name: "Progressive Tax (US-style)"
+    brackets:
+      - [0, 10000, 0.10]
+      - [10000, 40000, 0.15]
+      - [40000, 80000, 0.25]
+      - [80000, 160000, 0.30]
+      - [160000, inf, 0.35]
+  
+  flat_tax:
+    name: "Flat Tax (25%)"
+    rate: 0.25
+  
+  regressive_tax:
+    name: "Regressive Tax"
+    brackets:
+      - [0, 50000, 0.30]
+      - [50000, 100000, 0.25]
+      - [100000, 200000, 0.20]
+      - [200000, inf, 0.15]
+
+# Analysis Settings
+analysis:
+  income_range: [0, 200000]
+  num_points: 1000
+  tax_burden_analysis: true
+  tax_incidence_analysis: true
+  progressivity_analysis: true
+  revenue_efficiency_metrics: true
+
+# Visualization Settings
+visualization:
+  style: "seaborn"  # Options: seaborn, matplotlib, plotly
+  figure_size: [12, 8]
+  color_palette: "husl"
+  save_format: "html"  # Options: html, png, pdf
+
+# Ranking Criteria Weights
+ranking_criteria:
+  revenue: 0.4
+  progressivity: 0.3
+  efficiency: 0.3
+
+# Sensitivity Analysis
+sensitivity:
+  flat_tax_rate_range: [0.15, 0.35]
+  num_sensitivity_points: 10
+
+# Output Settings
+output:
+  data_directory: "data"
+  charts_directory: "data/charts"
+  reports_directory: "data/reports"
+  save_interactive_charts: true
+  save_summary_tables: true 
