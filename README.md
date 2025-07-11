@@ -37,22 +37,24 @@ taxmetrics/
 
 2. Collect OECD tax data:
    ```bash
-   python scripts/collect_oecd_data.py --countries USA,GBR,DEU --years 2015,2023 --clean --summary
+   python3 scripts/fetch_data.py
    ```
 
-3. Run the main analysis:
+3. Run tax policy analysis:
    ```bash
-   python src/main.py
+   # Real data analysis (using OECD data)
+   python3 scripts/analysis.py --type real
+   
+   # OECD descriptive statistics
+   python3 scripts/analysis.py --type oecd
+   
+   # Both real data and OECD analysis (default)
+   python3 scripts/analysis.py --type both
    ```
 
 4. Explore interactive notebooks:
    ```bash
    jupyter notebook notebooks/
-   ```
-
-5. Try the basic example:
-   ```bash
-   python scripts/fetch_data.py
    ```
 
 ## Key Components
@@ -70,6 +72,8 @@ taxmetrics/
 - **Custom Tax**: User-defined tax structures
 
 ### Analysis Tools
+- **Real Data Analysis**: Use actual OECD tax data to create country-specific tax policies
+- **OECD Descriptive Statistics**: Analyze raw OECD data for insights and trends
 - Revenue calculation under different scenarios
 - Tax burden analysis (who pays what)
 - Tax progressivity metrics
@@ -111,6 +115,19 @@ flat = FlatTax(rate=0.25)
 calculator = RevenueCalculator()
 revenue_progressive = calculator.calculate_revenue(progressive, income_distribution)
 revenue_flat = calculator.calculate_revenue(flat, income_distribution)
+```
+
+### Real Data Analysis
+```python
+# Run analysis using real OECD data
+python3 scripts/analysis.py --type real --data-file data/processed/analysis_ready_data.csv
+
+# This creates tax policies based on actual country data:
+# - France Progressive (48.6% top rate)
+# - Germany Progressive (43.4% top rate) 
+# - Japan Progressive (50.0% top rate)
+# - UK Progressive (58.3% top rate)
+# - USA Progressive (34.0% top rate)
 ```
 
 ## Data Sources
