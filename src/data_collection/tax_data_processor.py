@@ -5,9 +5,9 @@ This module provides tools to clean, validate, and prepare OECD tax data
 for analysis.
 
 Data Sources:
-- Revenue Statistics: https://stats.oecd.org/index.aspx?DataSetCode=REV
-- Taxing Wages: https://stats.oecd.org/index.aspx?DataSetCode=TAXWAGE
-- Tax Structures: https://stats.oecd.org/index.aspx?DataSetCode=TAX_STRUCT
+- Revenue Statistics: https://stats.oecd.org/Index.aspx?DataSetCode=REV
+- Tax Rates: https://stats.oecd.org/Index.aspx?DataSetCode=TAX_RATES
+- Tax Structures: https://stats.oecd.org/Index.aspx?DataSetCode=TAX_STRUCT
 """
 
 import pandas as pd

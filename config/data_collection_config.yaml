@@ -8,9 +8,16 @@ oecd:
   retry_attempts: 3
   delay_between_requests: 1  # seconds
 
-# Default Countries to Collect
+# Countries Configuration
 countries:
-  # OECD Members
+  # Collection modes
+  collection_modes:
+    comprehensive: "all_available"  # Collect data for all available countries
+    oecd_only: "oecd_members"       # Collect data for OECD members only
+    major_economies: "major_economies"  # Collect data for major economies
+    custom: "custom_selection"      # Collect data for custom selection
+  
+  # OECD Members (38 countries)
   oecd_members:
     - AUS  # Australia
     - AUT  # Austria
@@ -59,6 +66,31 @@ countries:
     - IDN  # Indonesia
     - RUS  # Russian Federation
     - ZAF  # South Africa
+    - ARG  # Argentina
+    - SAU  # Saudi Arabia
+  
+  # G20 Countries
+  g20_countries:
+    - ARG  # Argentina
+    - AUS  # Australia
+    - BRA  # Brazil
+    - CAN  # Canada
+    - CHN  # China
+    - FRA  # France
+    - DEU  # Germany
+    - IND  # India
+    - IDN  # Indonesia
+    - ITA  # Italy
+    - JPN  # Japan
+    - KOR  # Korea
+    - MEX  # Mexico
+    - RUS  # Russian Federation
+    - SAU  # Saudi Arabia
+    - ZAF  # South Africa
+    - TUR  # Turkey
+    - GBR  # United Kingdom
+    - USA  # United States
+    - EU   # European Union
   
   # Default selection for quick analysis
   default_selection:
@@ -69,20 +101,30 @@ countries:
     - JPN  # Japan
     - CAN  # Canada
     - AUS  # Australia
+  
+  # Current collection mode
+  current_mode: "comprehensive"  # Options: comprehensive, oecd_only, major_economies, custom
 
-# Time Periods
+# Time Periods Configuration
 time_periods:
-  # Default years to collect
+  # Collection modes
+  collection_modes:
+    comprehensive: "all_available"  # Collect data for all available years
+    historical: "historical_range"  # Collect data for historical analysis
+    recent: "recent_range"          # Collect data for recent analysis
+    custom: "custom_range"          # Collect data for custom range
+  
+  # Year ranges
   default_years: [2015, 2023]
-  
-  # Historical analysis (longer period)
-  historical_years: [1990, 2023]
-  
-  # Recent analysis (shorter period)
+  historical_years: [1965, 2023]  # OECD data typically starts from 1965
   recent_years: [2018, 2023]
+  comprehensive_years: [1965, 2024]  # All available years
   
   # Annual updates
   current_year: 2024
+  
+  # Current collection mode
+  current_mode: "comprehensive"  # Options: comprehensive, historical, recent, custom
 
 # Data Sources
 data_sources:
@@ -90,19 +132,61 @@ data_sources:
     enabled: true
     dataset_id: "REV"
     description: "Tax revenue statistics as % of GDP"
-    source_url: "https://stats.oecd.org/index.aspx?DataSetCode=REV"
+    source_url: "https://stats.oecd.org/Index.aspx?DataSetCode=REV"
   
   tax_rates:
     enabled: true
     dataset_id: "TAXWAGE"
     description: "Personal and corporate tax rates"
-    source_url: "https://stats.oecd.org/index.aspx?DataSetCode=TAXWAGE"
+    source_url: "https://stats.oecd.org/Index.aspx?DataSetCode=TAXWAGE"
   
   tax_structures:
     enabled: true
     dataset_id: "TAX_STRUCT"
     description: "Tax system structure information"
-    source_url: "https://stats.oecd.org/index.aspx?DataSetCode=TAX_STRUCT"
+    source_url: "https://stats.oecd.org/Index.aspx?DataSetCode=TAX_STRUCT"
+  
+  tax_revenue:
+    enabled: false
+    dataset_id: "TAX_REV"
+    description: "Detailed tax revenue breakdown"
+    source_url: "https://stats.oecd.org/Index.aspx?DataSetCode=TAX_REV"
+  
+  tax_policy:
+    enabled: false
+    dataset_id: "TAX_POL"
+    description: "Tax policy indicators and reforms"
+    source_url: "https://stats.oecd.org/Index.aspx?DataSetCode=TAX_POL"
+  
+  tax_database:
+    enabled: false
+    dataset_id: "TAX_DB"
+    description: "Comprehensive tax database"
+    source_url: "https://stats.oecd.org/Index.aspx?DataSetCode=TAX_DB"
+  
+  tax_statistics:
+    enabled: false
+    dataset_id: "TAX_STAT"
+    description: "General tax statistics"
+    source_url: "https://stats.oecd.org/Index.aspx?DataSetCode=TAX_STAT"
+  
+  government_revenue:
+    enabled: false
+    dataset_id: "GOV_REV"
+    description: "Government revenue statistics"
+    source_url: "https://stats.oecd.org/Index.aspx?DataSetCode=GOV_REV"
+  
+  fiscal_decentralisation:
+    enabled: false
+    dataset_id: "FISCAL_DEC"
+    description: "Fiscal decentralisation indicators"
+    source_url: "https://stats.oecd.org/Index.aspx?DataSetCode=FISCAL_DEC"
+  
+  tax_administration:
+    enabled: false
+    dataset_id: "TAX_ADMIN"
+    description: "Tax administration statistics"
+    source_url: "https://stats.oecd.org/Index.aspx?DataSetCode=TAX_ADMIN"
 
 # Data Validation Rules
 validation:
