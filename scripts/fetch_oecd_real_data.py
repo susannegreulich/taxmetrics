@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-Parse local OECD SDMX-JSON file (data.org) using pandasdmx and save as CSV.
+Fetch Real OECD Data from SDMX-ML API
 
-This script loads a local SDMX-JSON file (e.g., downloaded from OECD), parses it with pandasdmx,
-converts it to a pandas DataFrame, and saves it as CSV for further analysis.
+This script fetches data from three OECD tables using their SDMX-ML API endpoints,
+parses the XML responses with pandasdmx, converts them to pandas DataFrames,
+and saves them as CSV files for further analysis.
 """
 
 import os
 import requests
 import pandasdmx
+import time
 
 # Data URLS
 # tax revs: https://data-explorer.oecd.org/vis?fs[0]=Topic%2C1%7CTaxation%23TAX%23%7CGlobal%20tax%20revenues%23TAX_GTR%23&pg=0&fc=Topic&bp=true&snb=155&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_REV_COMP_GLOBAL%40DF_RSGLOBAL&df[ag]=OECD.CTP.TPS&df[vs]=2.1&dq=..S13._T..PT_B1GQ.A&lom=LASTNPERIODS&lo=10&to[TIME_PERIOD]=false
@@ -18,21 +20,37 @@ import pandasdmx
 # Ensure the data directory exists
 os.makedirs("data", exist_ok=True)
 
-# --- First Table: Revenue Statistics ---
-url1 = "https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/..S13._T..PT_B1GQ.A?startPeriod=2014&dimensionAtObservation=AllDimensions"
-response1 = requests.get(url1)
+# Set up headers to mimic a browser
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Accept': 'application/vnd.sdmx.genericdata+xml; charset=utf-8; version=2.1',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+}
+
+# structure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.CTP.TPS/DSD_REV_COMP_GLOBAL@DF_RSGLOBAL/2.1?references=all
+# --- First Table: Detailed Tax Categories --- 1990-2023
+print("Fetching Table 1: Detailed Tax Categories...")
+url1 = "https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/..S13.T_5000+T_4000+T_2000+T_1000+_T..PT_B1GQ.A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
+response1 = requests.get(url1, headers=headers)
 response1.raise_for_status()
-with open("data/oecd_data.xml", "wb") as f:
+with open("data/oecd_data1.xml", "wb") as f:
     f.write(response1.content)
-msg1 = pandasdmx.read_sdmx("data/oecd_data.xml")
+msg1 = pandasdmx.read_sdmx("data/oecd_data1.xml")
 df1 = msg1.to_pandas()
-df1.to_csv("data/oecd_api_data.csv")
-print("Saved as data/oecd_api_data.csv")
+df1.to_csv("data/oecd_api_data1.csv")
+print("Saved as data/oecd_api_data1.csv")
 print(df1.head())
 
-# --- Second Table: National Accounts Main Aggregates (Australia) ---
-url2 = "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1_OUTPUT,2.0/A.AUS........V..?startPeriod=2019&dimensionAtObservation=AllDimensions"
-response2 = requests.get(url2)
+# Add delay between requests to avoid rate limiting
+time.sleep(2)
+
+# --- Second Table: National Accounts GDP per capita and PPP ---
+print("Fetching Table 2: National Accounts GDP per capita and PPP...")
+url2 = "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A........PC+USD_PPP_PS+USD_PPP..G1.T0101?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
+response2 = requests.get(url2, headers=headers)
 response2.raise_for_status()
 with open("data/oecd_data2.xml", "wb") as f:
     f.write(response2.content)
@@ -42,9 +60,13 @@ df2.to_csv("data/oecd_api_data2.csv")
 print("Saved as data/oecd_api_data2.csv")
 print(df2.head())
 
-# --- Third Table: Detailed Tax Categories ---
-url3 = "https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/..S13.T_5000+T_4000+T_2000+T_1000+_T..PT_B1GQ.A?startPeriod=2014&dimensionAtObservation=AllDimensions"
-response3 = requests.get(url3)
+# Add delay between requests to avoid rate limiting
+time.sleep(2)
+
+# --- Third Table: Labor Force Statistics (Working-age population) ---
+print("Fetching Table 3: Labor Force Statistics...")
+url3 = "https://sdmx.oecd.org/public/rest/data/OECD.SDD.TPS,DSD_LFS@DF_IALFS_LF_Q,1.0/.LF.._Z.Y._T.Y15T64..A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
+response3 = requests.get(url3, headers=headers)
 response3.raise_for_status()
 with open("data/oecd_data3.xml", "wb") as f:
     f.write(response3.content)
@@ -54,14 +76,4 @@ df3.to_csv("data/oecd_api_data3.csv")
 print("Saved as data/oecd_api_data3.csv")
 print(df3.head())
 
-# --- Fourth Table: National Accounts GDP per capita and PPP ---
-url4 = "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A........PC+USD_PPP_PS+USD_PPP..G1.T0101?startPeriod=1990&endPeriod=2024&dimensionAtObservation=AllDimensions"
-response4 = requests.get(url4)
-response4.raise_for_status()
-with open("data/oecd_data4.xml", "wb") as f:
-    f.write(response4.content)
-msg4 = pandasdmx.read_sdmx("data/oecd_data4.xml")
-df4 = msg4.to_pandas()
-df4.to_csv("data/oecd_api_data4.csv")
-print("Saved as data/oecd_api_data4.csv")
-print(df4.head()) 
+print("All data collection completed successfully!") 
