@@ -3,9 +3,9 @@
 Descriptive Statistics Script for Labeled Datasets
 
 This script analyzes the VALUE column in the three labeled datasets:
-- GDP labeled data
-- Labor force labeled data  
-- Tax revenues labeled data
+- GDP labeled data (economic growth indicators in US dollars PPP)
+- Population labeled data (population counts in persons)
+- Tax revenues labeled data (tax revenue percentages of GDP)
 
 Outputs comprehensive descriptive statistics in markdown format.
 """
@@ -88,9 +88,9 @@ def generate_markdown_report(stats_list):
     report.append("")
     report.append("This report provides comprehensive descriptive statistics for the VALUE column in the three labeled datasets:")
     report.append("")
-    report.append("1. **GDP Labeled Data** - Economic growth indicators")
-    report.append("2. **Labor Force Labeled Data** - Employment statistics") 
-    report.append("3. **Tax Revenues Labeled Data** - Government revenue data")
+    report.append("1. **GDP** - Economic growth indicators (US dollars, PPP converted)")
+    report.append("2. **Population** - Population counts (persons)") 
+    report.append("3. **Tax Revenues** - Government tax revenue data (percentage of GDP)")
     report.append("")
     
     # Calculate column widths for proper alignment
@@ -242,10 +242,12 @@ def generate_markdown_report(stats_list):
         report.append("")
         
         for stats in valid_stats:
-            if stats['mean'] > 1000:
-                scale = "Large scale (thousands+)"
+            if stats['mean'] > 1000000:
+                scale = "Very large scale (millions+)"
+            elif stats['mean'] > 10000:
+                scale = "Large scale (tens of thousands+)"
             elif stats['mean'] > 100:
-                scale = "Medium scale (hundreds)"
+                scale = "Medium scale (hundreds+)"
             elif stats['mean'] > 10:
                 scale = "Small scale (tens)"
             else:
@@ -305,9 +307,9 @@ def main():
     # Define dataset paths
     data_dir = Path("data/labeled")
     datasets = [
-        ("GDP Labeled Data", data_dir / "gdp_labeled.csv"),
-        ("Labor Force Labeled Data", data_dir / "labor_force_labeled.csv"),
-        ("Tax Revenues Labeled Data", data_dir / "tax_revenues_labeled.csv")
+        ("GDP", data_dir / "gdp_labeled.csv"),
+        ("Population", data_dir / "population_labeled.csv"),
+        ("Tax Revenues", data_dir / "tax_revenues_labeled.csv")
     ]
     
     print("Loading and analyzing datasets...")
@@ -324,7 +326,7 @@ def main():
     report = generate_markdown_report(stats_list)
     
     # Save report to file
-    output_file = Path("results/descriptive_statistics_report.md")
+    output_file = Path("data/summary/descriptive_stats.md")
     output_file.parent.mkdir(exist_ok=True)
     
     with open(output_file, 'w', encoding='utf-8') as f:
