@@ -79,13 +79,11 @@ def download_all_structure_queries():
 # Download structure queries for labeling
 download_all_structure_queries()
 
-
-
 # Data queries for each dataset
 
 # --- First Table: Tax Revenues 1990-2023
 print("Fetching Table 1: Tax Revenues...")
-url1 = "https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/...T_5000+T_4000+T_2000+T_1000+_T..PT_B1GQ.A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
+url1 = "https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/..S13.T_5000+T_4000+T_2000+T_1000+_T..PT_B1GQ.A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
 response1 = requests.get(url1, headers=headers)
 response1.raise_for_status()
 with open("data/raw/tax_revenues.xml", "wb") as f:

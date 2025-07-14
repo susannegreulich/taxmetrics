@@ -1,24 +1,35 @@
 # Todos: 
 
+change to data/labeled. 
+processed is for unique values, removing redundant countries etc. 
+
+1. make unique values output in csv, same dimensions format as original datasets, so one table for each datasets. easiest
+to see at a glance the unique values. 
+2. find common countries in the 3 datasets, and delete data for countries not in all 3 datasets
+3. summary descriptive stats. 
+4. make the plots. 
+
 data:
 
 queries:
 
 # Data Source URLS
 
-# GDP: https://data-explorer.oecd.org/vis?tm=annual%20gdp%20developer&pg=0&hc[Table%20identifier]=&snb=157&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE1&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A........PC%2BUSD_PPP_PS%2BUSD_PPP..G1.T0101&pd=1990%2C2024&to[TIME_PERIOD]=false
-data: https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1...._T..PC+USD_PPP_PS+USD_PPP..G1.T0101?startPeriod=1990&endPeriod=2024&dimensionAtObservation=AllDimensions
-structure: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1/2.0?references=all
 
-tax link: https://data-explorer.oecd.org/vis?fs[0]=Topic%2C1%7CTaxation%23TAX%23%7CGlobal%20tax%20revenues%23TAX_GTR%23&pg=0&fc=Topic&bp=true&snb=155&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_REV_COMP_GLOBAL%40DF_RSGLOBAL&df[ag]=OECD.CTP.TPS&df[vs]=2.1&dq=..S13._T..PT_B1GQ.A&lom=LASTNPERIODS&lo=10&to[TIME_PERIOD]=false
-tax data: https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/...T_5000+T_4000+T_2000+T_1000+_T..PT_B1GQ.A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
-tax structure: https://sdmx.oecd.org/public/rest/dataflow/OECD.CTP.TPS/DSD_REV_COMP_GLOBAL@DF_RSGLOBAL/2.1?references=all
+tax link: https://data-explorer.oecd.org/vis?fs[0]=Topic%2C1%7CTaxation%23TAX%23%7CGlobal%20tax%20revenues%23TAX_GTR%23&pg=0&fc=Topic&bp=true&snb=155&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_REV_COMP_GLOBAL%40DF_RSGLOBAL&df[ag]=OECD.CTP.TPS&df[vs]=2.1&dq=..S13.T_5000%2BT_4000%2BT_2000%2BT_1000%2B_T..PT_B1GQ.A&to[TIME_PERIOD]=false&pd=1990%2C2023
+tax data query: https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/..S13.T_5000+T_4000+T_2000+T_1000+_T..PT_B1GQ.A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
+tax structure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.CTP.TPS/DSD_REV_COMP_GLOBAL@DF_RSGLOBAL/2.1?references=all
+
+# GDP link: https://data-explorer.oecd.org/vis?tm=annual%20gdp%20developer&pg=0&hc[Table%20identifier]=&snb=157&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE1&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A........PC%2BUSD_PPP_PS%2BUSD_PPP..G1.T0101&pd=1990%2C2024&to[TIME_PERIOD]=false
+GDP data query: https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1...._T..PC+USD_PPP_PS+USD_PPP..G1.T0101?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
+GDPstructure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1/2.0?references=all
 
 labor link: https://data-explorer.oecd.org/vis?tm=population%20labour&pg=0&snb=99&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_LFS%40DF_IALFS_LF_Q&df[ag]=OECD.SDD.TPS&df[vs]=1.0&dq=.LF.._Z.Y._T.Y15T64..Q&lom=LASTNPERIODS&lo=7&to[TIME_PERIOD]=false&vw=tb
-labor data: https://sdmx.oecd.org/public/rest/data/OECD.SDD.TPS,DSD_LFS@DF_IALFS_LF_Q,1.0/.LF.._Z.Y._T.Y15T64..A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
-labor structure: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.TPS/DSD_LFS@DF_IALFS_LF_Q/1.0?references=all
+labor data query: https://sdmx.oecd.org/public/rest/data/OECD.SDD.TPS,DSD_LFS@DF_IALFS_LF_Q,1.0/.LF.._Z.Y._T.Y15T64..A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
+labor structure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.TPS/DSD_LFS@DF_IALFS_LF_Q/1.0?references=all
 
-
+# data summary descriptive statistics
+mean, median, max, min. for values of all  3 tables. to see if any outliers, any missing values, any nonsensical values. 
 
 gdp output table link: https://data-explorer.oecd.org/vis?tm=annual%20gdp&pg=0&fc=Measure&snb=317&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE1_OUTPUT&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A......_T..USD_EXC.V..&pd=1990%2C2023&to[TIME_PERIOD]=false&vw=tb
 gdp data:  https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1_OUTPUT,2.0/A......_T..USD_EXC.V..?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
@@ -27,11 +38,6 @@ gdp structure: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAI
 
 make the unique values script output the unique values in csv, 1 table for each data set. ie exact same 'dimensions' as 
 original datasets, but only with unique values. 
-
-
-
-1. label ALL identifiers. still some left. 
-2. get data for more countries. 
 
 years correct
 the right tax CATEGORies, RIGHT NOW, property and social securuity missing. 

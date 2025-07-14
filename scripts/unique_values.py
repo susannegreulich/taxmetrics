@@ -1,162 +1,83 @@
 #!/usr/bin/env python3
 """
-Script to analyze unique values for each variable in OECD datasets.
-This helps verify that the correct data was extracted from the API.
-Shows EXHAUSTIVE lists of all unique values, not just samples.
+Script to extract unique values for each variable in OECD datasets and output as CSV files.
+Each column represents a dimension/variable, and each row contains one unique value from that dimension.
 """
 
 import pandas as pd
 import os
 from pathlib import Path
-import json
 from typing import Dict, List, Any
 
-def analyze_dataset_unique_values(file_path: str) -> Dict[str, Any]:
+def create_unique_values_csv(file_path: str, output_file: str):
     """
-    Analyze unique values for each column in a dataset.
+    Create a CSV file with unique values for each variable, with each column representing a dimension.
     
     Args:
-        file_path: Path to the CSV file
-        
-    Returns:
-        Dictionary containing analysis results
+        file_path: Path to the input CSV file
+        output_file: Output CSV file path
     """
     try:
         # Read the CSV file
         df = pd.read_csv(file_path)
         
-        # Get basic info
-        total_rows = len(df)
-        total_columns = len(df.columns)
+        # Get all columns except the value column
+        dimension_columns = [col for col in df.columns if col.upper() != 'VALUE']
         
-        # Analyze each column (excluding VALUE column)
-        column_analysis = {}
+        # Create a dictionary to store unique values for each dimension
+        unique_values_dict = {}
         
-        for column in df.columns:
-            # Skip the VALUE column as it contains numerical data we don't need to analyze
-            if column.upper() == 'VALUE':
-                continue
-                
-            unique_values = df[column].unique()
-            unique_count = len(unique_values)
-            
-            # Get all unique values
-            all_unique_values = unique_values.tolist()
-            
-            # Check for missing values
-            missing_count = df[column].isnull().sum()
-            missing_percentage = (missing_count / total_rows) * 100 if total_rows > 0 else 0
-            
-            # Get data type
-            dtype = str(df[column].dtype)
-            
-            column_analysis[column] = {
-                'unique_count': unique_count,
-                'all_unique_values': all_unique_values,
-                'missing_count': int(missing_count),
-                'missing_percentage': round(missing_percentage, 2),
-                'data_type': dtype
-            }
+        for column in dimension_columns:
+            unique_values = sorted(df[column].unique().tolist())
+            unique_values_dict[column] = unique_values
         
-        return {
-            'file_path': file_path,
-            'total_rows': total_rows,
-            'total_columns': total_columns,
-            'columns': column_analysis
-        }
+        # Find the maximum number of unique values across all dimensions
+        max_unique_count = max(len(values) for values in unique_values_dict.values())
         
+        # Create a dataframe where each column is a dimension and rows contain unique values
+        # Pad shorter columns with empty strings
+        csv_data = {}
+        for column, values in unique_values_dict.items():
+            # Pad the list to match the maximum length
+            padded_values = values + [''] * (max_unique_count - len(values))
+            csv_data[column] = padded_values
+        
+        unique_df = pd.DataFrame(csv_data)
+        
+        # Save to CSV
+        unique_df.to_csv(output_file, index=False)
+        
+        print(f"Unique values CSV saved to: {output_file}")
+        print(f"  - {max_unique_count:,} rows (maximum unique values across all dimensions)")
+        print(f"  - Columns: {', '.join(dimension_columns)}")
+        
+        # Print summary of unique values per dimension
+        for column, values in unique_values_dict.items():
+            print(f"  - {column}: {len(values):,} unique values")
+            
     except Exception as e:
-        return {
-            'file_path': file_path,
-            'error': str(e)
-        }
-
-def print_analysis_results(analysis: Dict[str, Any], dataset_name: str):
-    """
-    Print formatted analysis results with EXHAUSTIVE lists of all unique values.
-    
-    Args:
-        analysis: Analysis results dictionary
-        dataset_name: Name of the dataset
-    """
-    print(f"\n{'='*80}")
-    print(f"ANALYSIS RESULTS FOR {dataset_name.upper()}")
-    print(f"{'='*80}")
-    
-    if 'error' in analysis:
-        print(f"ERROR: {analysis['error']}")
-        return
-    
-    print(f"File: {analysis['file_path']}")
-    print(f"Total Rows: {analysis['total_rows']:,}")
-    print(f"Total Columns: {analysis['total_columns']}")
-    print()
-    
-    for column, info in analysis['columns'].items():
-        print(f"Column: {column}")
-        print(f"  Data Type: {info['data_type']}")
-        print(f"  Unique Values: {info['unique_count']:,}")
-        print(f"  Missing Values: {info['missing_count']:,} ({info['missing_percentage']}%)")
-        
-        # Always show all unique values, sorted for readability
-        all_values = sorted(info['all_unique_values'])
-        if info['unique_count'] <= 50:
-            print(f"  All Unique Values: {all_values}")
-        else:
-            print(f"  All Unique Values ({info['unique_count']:,} total):")
-            # Print in columns for better readability
-            for i in range(0, len(all_values), 5):
-                chunk = all_values[i:i+5]
-                print(f"    {chunk}")
-        
-        print()
-
-def save_analysis_to_json(analyses: Dict[str, Dict], output_file: str):
-    """
-    Save analysis results to JSON file.
-    
-    Args:
-        analyses: Dictionary of analysis results
-        output_file: Output file path
-    """
-    # Convert numpy types to native Python types for JSON serialization
-    def convert_numpy_types(obj):
-        if isinstance(obj, dict):
-            return {k: convert_numpy_types(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [convert_numpy_types(item) for item in obj]
-        elif hasattr(obj, 'item'):  # numpy types
-            return obj.item()
-        else:
-            return obj
-    
-    converted_analyses = convert_numpy_types(analyses)
-    
-    with open(output_file, 'w') as f:
-        json.dump(converted_analyses, f, indent=2, default=str)
-    
-    print(f"\nAnalysis results saved to: {output_file}")
+        print(f"ERROR processing {file_path}: {str(e)}")
 
 def main():
-    """Main function to analyze all datasets."""
+    """Main function to process all datasets."""
     # Define data directory and files
-    data_dir = Path("data")
+    data_dir = Path("data/labeled")
     
-    # List of datasets to analyze (labeled versions)
+    # List of datasets to process
     datasets = [
-        ("tax_revenues_labeled.csv", "Tax Revenues Labeled Data"),
-        ("gdp_labeled.csv", "GDP Labeled Data"), 
-        ("labor_force_labeled.csv", "Labor Force Labeled Data")
+        ("tax_revenues_labeled.csv", "Tax Revenues"),
+        ("gdp_labeled.csv", "GDP"), 
+        ("labor_force_labeled.csv", "Labor Force")
     ]
     
-    print("OECD Dataset Unique Values Analysis")
+    print("OECD Dataset Unique Values Extraction")
     print("=" * 50)
-    print("This script analyzes unique values for each variable in the labeled OECD datasets")
-    print("to help verify that the correct data was extracted from the API.")
-    print("EXHAUSTIVE lists of all unique values will be shown.")
+    print("This script extracts unique values for each variable in the labeled OECD datasets")
+    print("and outputs them as CSV files with each column representing a dimension.")
     print()
     
-    all_analyses = {}
+    # Create output directory
+    os.makedirs("results/unique_values_csv", exist_ok=True)
     
     for filename, dataset_name in datasets:
         file_path = data_dir / filename
@@ -165,31 +86,16 @@ def main():
             print(f"WARNING: File {file_path} not found, skipping...")
             continue
         
-        print(f"Analyzing {dataset_name}...")
-        analysis = analyze_dataset_unique_values(str(file_path))
-        all_analyses[dataset_name] = analysis
+        print(f"Processing {dataset_name}...")
         
-        # Print results
-        print_analysis_results(analysis, dataset_name)
-    
-    # Save results to JSON file
-    output_file = "results/unique_values_analysis_labeled.json"
-    os.makedirs("results", exist_ok=True)
-    save_analysis_to_json(all_analyses, output_file)
-    
-    # Print summary
-    print("\n" + "="*80)
-    print("SUMMARY")
-    print("="*80)
-    
-    for dataset_name, analysis in all_analyses.items():
-        if 'error' not in analysis:
-            print(f"{dataset_name}:")
-            print(f"  - {analysis['total_rows']:,} rows, {analysis['total_columns']} columns")
-            print(f"  - Columns: {', '.join(analysis['columns'].keys())}")
-        else:
-            print(f"{dataset_name}: ERROR - {analysis['error']}")
+        # Create output filename
+        base_name = filename.replace('_labeled.csv', '')
+        output_csv = f"results/unique_values_csv/{base_name}_unique_values.csv"
+        
+        create_unique_values_csv(str(file_path), output_csv)
         print()
+    
+    print("All CSV files created in: results/unique_values_csv/")
 
 if __name__ == "__main__":
     main() 

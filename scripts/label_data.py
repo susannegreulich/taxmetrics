@@ -82,6 +82,25 @@ def extract_dataset_codelists(structure_file, dataset_name):
         ]
     }
     
+    # Define mapping from codelist names to CSV column names
+    codelist_to_column_mapping = {
+        'AREA': 'REF_AREA',
+        'STANDARD_REVENUE': 'STANDARD_REVENUE',
+        'CTRY_SPECIFIC_REVENUE': 'CTRY_SPECIFIC_REVENUE',
+        'UNIT_MEASURE': 'UNIT_MEASURE',
+        'FREQ': 'FREQ',
+        'SECTOR': 'SECTOR',
+        'COUNTERPART_SECTOR': 'COUNTERPART_SECTOR',
+        'INSTR_ASSET': 'INSTR_ASSET',
+        'EXPENDITURE': 'EXPENDITURE',
+        'TRANSFORMATION': 'TRANSFORMATION',
+        'TABLEID': 'TABLEID',
+        'TRANSACTION': 'TRANSACTION',
+        'ADJUSTMENT': 'ADJUSTMENT',
+        'SEX': 'SEX',
+        'AGE': 'AGE'
+    }
+    
     codelists = {}
     relevant_codelists = dataset_codelists.get(dataset_name, [])
     
@@ -90,7 +109,9 @@ def extract_dataset_codelists(structure_file, dataset_name):
         if codes:
             # Convert codelist ID to mapping name
             mapping_name = codelist_id.replace('CL_', '')
-            codelists[mapping_name] = codes
+            # Map to the actual column name used in CSV files
+            column_name = codelist_to_column_mapping.get(mapping_name, mapping_name)
+            codelists[column_name] = codes
     
     return codelists
 
@@ -100,10 +121,8 @@ def load_and_extract_all_mappings():
     print("Step 1: Loading Structure Files and Extracting Codelists")
     print("=" * 60)
     
-    # Ensure data/processed directory exists
-    Path("data/processed").mkdir(parents=True, exist_ok=True)
-    
-    all_dataset_mappings = {}
+    # Ensure data/labeled directory exists
+    Path("data/labeled").mkdir(parents=True, exist_ok=True)
     
     # Define the datasets and their structure files (now in data/raw)
     datasets = {
@@ -121,10 +140,9 @@ def load_and_extract_all_mappings():
         if structure_file.exists():
             # Extract codelists for this dataset
             codelists = extract_dataset_codelists(structure_file, dataset_name)
-            all_dataset_mappings[dataset_name] = codelists
             
             # Save individual dataset mappings
-            output_file = Path(f"data/processed/{dataset_name}_mappings.json")
+            output_file = Path(f"data/labeled/{dataset_name}_mappings.json")
             with open(output_file, 'w') as f:
                 json.dump(codelists, f, indent=2)
             print(f"  Saved {dataset_name} mappings to: {output_file}")
@@ -138,14 +156,8 @@ def load_and_extract_all_mappings():
             print(f"  Please run fetch_data.py first to download structure files")
             return None
     
-    # Save combined mappings
-    combined_file = Path("data/processed/all_datasets_mappings.json")
-    with open(combined_file, 'w') as f:
-        json.dump(all_dataset_mappings, f, indent=2)
-    
-    print(f"\nSaved combined mappings to: {combined_file}")
-    
-    return all_dataset_mappings
+    print(f"\nAll individual dataset mappings saved to data/labeled/")
+    return True
 
 def get_comprehensive_label_mappings():
     """Get optimized fallback label mappings for OECD data (only includes necessary mappings)"""
@@ -214,7 +226,7 @@ def apply_label_mappings(df, mappings, fallback_mappings=None):
     
     return df_labeled
 
-def process_csv_file(input_file, output_file, dataset_mappings, fallback_mappings):
+def process_csv_file(input_file, output_file, fallback_mappings):
     """Process a single CSV file and apply label mappings"""
     print(f"Processing: {input_file}")
     
@@ -227,19 +239,28 @@ def process_csv_file(input_file, output_file, dataset_mappings, fallback_mapping
         # Determine which mappings to use based on filename
         filename = input_file.name.lower()
         if 'tax' in filename:
-            mappings_to_use = dataset_mappings.get('tax_revenues', fallback_mappings)
+            mapping_file = Path("data/labeled/tax_revenues_mappings.json")
             dataset_name = 'tax_revenues'
         elif 'gdp' in filename:
-            mappings_to_use = dataset_mappings.get('gdp', fallback_mappings)
+            mapping_file = Path("data/labeled/gdp_mappings.json")
             dataset_name = 'gdp'
         elif 'labor' in filename:
-            mappings_to_use = dataset_mappings.get('labor_force', fallback_mappings)
+            mapping_file = Path("data/labeled/labor_force_mappings.json")
             dataset_name = 'labor_force'
         else:
             mappings_to_use = fallback_mappings
             dataset_name = 'unknown'
+            print(f"  Using fallback mappings for dataset: {dataset_name}")
         
-        print(f"  Using mappings for dataset: {dataset_name}")
+        # Load dataset-specific mappings if available
+        if dataset_name != 'unknown':
+            if mapping_file.exists():
+                with open(mapping_file, 'r') as f:
+                    mappings_to_use = json.load(f)
+                print(f"  Loaded mappings for dataset: {dataset_name}")
+            else:
+                print(f"  Mapping file not found: {mapping_file}")
+                mappings_to_use = fallback_mappings
         
         # Apply label mappings
         df_labeled = apply_label_mappings(df, mappings_to_use, fallback_mappings)
@@ -267,7 +288,7 @@ def process_csv_file(input_file, output_file, dataset_mappings, fallback_mapping
         print(f"  Error processing {input_file}: {e}")
         return False
 
-def apply_labels_to_csv_files(dataset_mappings):
+def apply_labels_to_csv_files():
     """Apply label mappings to all CSV files"""
     print("\n" + "=" * 60)
     print("Step 2: Applying Official OECD Labels to CSV Files")
@@ -298,11 +319,11 @@ def apply_labels_to_csv_files(dataset_mappings):
             print(f"Skipping already labeled file: {csv_file.name}")
             continue
             
-        # Create output filename in the data/processed directory
-        output_file = Path("data/processed") / f"{csv_file.stem}_labeled.csv"
+        # Create output filename in the data/labeled directory
+        output_file = Path("data/labeled") / f"{csv_file.stem}_labeled.csv"
         
         # Process the file
-        if process_csv_file(csv_file, output_file, dataset_mappings, fallback_mappings):
+        if process_csv_file(csv_file, output_file, fallback_mappings):
             successful += 1
         else:
             failed += 1
@@ -318,7 +339,7 @@ def apply_labels_to_csv_files(dataset_mappings):
     
     # List all generated files
     print("\nGenerated labeled files:")
-    for file in Path("data/processed").glob("*_labeled.csv"):
+    for file in Path("data/labeled").glob("*_labeled.csv"):
         size = file.stat().st_size
         print(f"  {file.name} ({size:,} bytes)")
 
@@ -329,23 +350,23 @@ def main():
     print("=" * 80)
     
     # Step 1: Load structure files and extract codelists
-    dataset_mappings = load_and_extract_all_mappings()
+    success = load_and_extract_all_mappings()
     
-    if dataset_mappings is None:
+    if not success:
         print("\nError: Could not load structure files.")
         print("Please run fetch_data.py first to download the required structure files.")
         return
     
     # Step 2: Apply labels to CSV files
-    apply_labels_to_csv_files(dataset_mappings)
+    apply_labels_to_csv_files()
     
     # Final summary
     print("\n" + "=" * 80)
     print("Complete Labeling Process Finished!")
     print("=" * 80)
     print("\nFiles generated:")
-    print("- Mapping JSON files in data/processed/")
-    print("- Labeled CSV files in data/processed/")
+    print("- Individual mapping JSON files in data/labeled/")
+    print("- Labeled CSV files in data/labeled/")
     print("\nNext steps:")
     print("1. Review the labeled CSV files")
     print("2. Use the labeled data for analysis")

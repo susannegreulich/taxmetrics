@@ -11,6 +11,7 @@ Data Sources:
 """
 
 import requests
+import requests_cache
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Optional, Tuple
@@ -38,7 +39,15 @@ class OECDDataCollector:
         """
         self.api_key = api_key
         self.base_url = "https://stats.oecd.org/SDMX-JSON/data"
-        self.session = requests.Session()
+        
+        # Create a cached session for better performance
+        # Cache responses for 24 hours to avoid repeated API calls
+        self.session = requests_cache.CachedSession(
+            cache_name='oecd_data_cache',
+            expire_after=86400,  # 24 hours
+            allowable_methods=('GET', 'HEAD'),
+            allowable_codes=(200, 201, 202, 203, 204, 205, 206, 207, 208, 226)
+        )
         
         # Load configuration
         if config_path:
@@ -847,6 +856,38 @@ class OECDDataCollector:
                 summary_data.append(summary)
         
         return pd.DataFrame(summary_data)
+    
+    def clear_cache(self):
+        """Clear the HTTP cache."""
+        self.session.cache.clear()
+        logger.info("HTTP cache cleared")
+    
+    def get_cache_info(self) -> Dict:
+        """Get information about the current cache status."""
+        cache_info = {
+            'cache_name': 'oecd_data_cache',
+            'cache_path': str(self.session.cache.db_path),
+            'cache_size': len(self.session.cache.responses),
+            'cache_created': 'Unknown'
+        }
+        return cache_info
+    
+    def cache_stats(self) -> Dict:
+        """Get cache statistics."""
+        if hasattr(self.session.cache, 'response_count'):
+            return {
+                'total_requests': self.session.cache.response_count(),
+                'cache_hits': self.session.cache.hit_count(),
+                'cache_misses': self.session.cache.miss_count(),
+                'hit_rate': self.session.cache.hit_rate()
+            }
+        else:
+            return {
+                'total_requests': 'Not available',
+                'cache_hits': 'Not available', 
+                'cache_misses': 'Not available',
+                'hit_rate': 'Not available'
+            }
 
 
 def main():
