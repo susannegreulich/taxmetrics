@@ -61,14 +61,14 @@ def create_unique_values_csv(file_path: str, output_file: str):
 def main():
     """Main function to process all datasets."""
     # Define data directory
-    data_dir = Path("data/raw")
+    data_dir = Path("data/labeled")
     
     # Check if data directory exists
     if not data_dir.exists():
         print(f"ERROR: Data directory {data_dir} does not exist!")
         return
     
-    # Find all CSV files in the data/raw directory
+    # Find all CSV files in the data/labeled directory
     csv_files = list(data_dir.glob("*.csv"))
     
     if not csv_files:
@@ -77,26 +77,35 @@ def main():
     
     print("OECD Dataset Unique Values Extraction")
     print("=" * 50)
-    print("This script extracts unique values for each variable in the raw OECD datasets")
+    print("This script extracts unique values for each variable in the labeled OECD datasets")
     print("and outputs them as CSV files with each column representing a dimension.")
     print(f"Found {len(csv_files)} CSV file(s) to process:")
     for csv_file in csv_files:
         print(f"  - {csv_file.name}")
     print()
     
+    # Create output directory if it doesn't exist
+    output_dir = Path("data/summary")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Output directory ensured: {output_dir}")
+    print()
+    
     # Process each CSV file
     for csv_file in csv_files:
         dataset_name = csv_file.stem  # Get filename without extension
         
+        # Remove "labeled" from the dataset name for cleaner output filenames
+        clean_name = dataset_name.replace("_labeled", "")
+        
         print(f"Processing {dataset_name}...")
         
-        # Create output filename
-        output_csv = data_dir / f"{dataset_name}_unique_values.csv"
+        # Create output filename in the data/summary directory
+        output_csv = Path("data/summary") / f"{clean_name}_unique_values.csv"
         
         create_unique_values_csv(str(csv_file), str(output_csv))
         print()
     
-    print("All unique values CSV files created in: data/raw/")
+    print("All unique values CSV files created in: data/summary/")
 
 if __name__ == "__main__":
     main() 
