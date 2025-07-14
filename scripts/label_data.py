@@ -1,50 +1,14 @@
 #!/usr/bin/env python3
 """
-Fetch OECD data with identifiers and apply comprehensive label mappings.
+Apply label mappings to existing CSV files.
 
-This script fetches OECD data using the simple JSON format and applies
-pre-defined label mappings to make the data human-readable.
+This script takes the identifier-label dictionary and applies it to all CSV files 
+in the data directory to create human-readable labeled versions.
 """
 
 import os
-import requests
 import pandas as pd
-import time
-import random
-import sys
-import json
-
-def make_request_with_retry(url, max_retries=5, base_delay=10):
-    """Make HTTP request with retry logic and exponential backoff"""
-    for attempt in range(max_retries):
-        try:
-            print(f"Making request to {url} (attempt {attempt + 1}/{max_retries})")
-            response = requests.get(url)
-            
-            if response.status_code == 429:
-                # Rate limited - wait much longer
-                delay = base_delay * (3 ** attempt) + random.uniform(5, 15)
-                print(f"Rate limited (429). Waiting {delay:.1f} seconds before retry...")
-                time.sleep(delay)
-                continue
-            elif response.status_code >= 500:
-                # Server error - retry with exponential backoff
-                delay = base_delay * (2 ** attempt) + random.uniform(1, 3)
-                print(f"Server error ({response.status_code}). Waiting {delay:.1f} seconds before retry...")
-                time.sleep(delay)
-                continue
-            else:
-                response.raise_for_status()
-                return response
-                
-        except requests.exceptions.RequestException as e:
-            if attempt == max_retries - 1:
-                raise e
-            delay = base_delay * (2 ** attempt) + random.uniform(1, 3)
-            print(f"Request failed: {e}. Waiting {delay:.1f} seconds before retry...")
-            time.sleep(delay)
-    
-    raise requests.exceptions.RequestException(f"Failed after {max_retries} attempts")
+from pathlib import Path
 
 def get_comprehensive_label_mappings():
     """Get comprehensive label mappings for OECD data"""
@@ -262,136 +226,106 @@ def apply_label_mappings(df, mappings):
     """Apply label mappings to DataFrame columns"""
     df_labeled = df.copy()
     
-    # If it's a Series with MultiIndex, convert to DataFrame first
-    if isinstance(df_labeled, pd.Series) and isinstance(df_labeled.index, pd.MultiIndex):
-        print("Converting Series with MultiIndex to DataFrame")
-        df_labeled = df_labeled.reset_index()
-    
     # Apply mappings to columns
     for col in df_labeled.columns:
         if col in mappings:
-            print(f"Applying labels to {col}")
+            print(f"    Applying labels to {col}")
             df_labeled[col] = df_labeled[col].map(mappings[col]).fillna(df_labeled[col])
     
     return df_labeled
 
-def fetch_oecd_data(url, filename, description):
-    """Fetch OECD data in XML format and apply labels"""
-    print(f"\n=== {description} ===")
-    print(f"Fetching data from: {url}")
+def process_csv_file(input_file, output_file, mappings):
+    """Process a single CSV file and apply label mappings"""
+    print(f"Processing: {input_file}")
     
-    # Make request with retry logic
-    response = make_request_with_retry(url)
-    
-    # Save XML response
-    xml_filename = f"data/{filename}.xml"
-    with open(xml_filename, "wb") as f:
-        f.write(response.content)
-    
-    print(f"Saved XML to {xml_filename}")
-    
-    # Parse XML with pandasdmx
-    msg = pandasdmx.read_sdmx(xml_filename)
-    df = msg.to_pandas()
-    
-    # Display info about the data
-    print(f"Data shape: {df.shape}")
-    print(f"Data type: {type(df)}")
-    
-    # If it's a Series with MultiIndex, convert to DataFrame
-    if isinstance(df, pd.Series) and isinstance(df.index, pd.MultiIndex):
-        print("Converting Series with MultiIndex to DataFrame")
-        df = df.reset_index()
-        print(f"After reset_index, shape: {df.shape}")
-        print(f"Columns: {list(df.columns)}")
-    
-    print("\nFirst few rows:")
-    print(df.head())
-    
-    # Apply label mappings
-    mappings = get_comprehensive_label_mappings()
-    df_labeled = apply_label_mappings(df, mappings)
-    
-    # Save both versions
-    df.to_csv(f"data/{filename}_raw.csv", index=False)
-    df_labeled.to_csv(f"data/{filename}_labeled.csv", index=False)
-    
-    print(f"Saved raw data to data/{filename}_raw.csv")
-    print(f"Saved labeled data to data/{filename}_labeled.csv")
-    
-    return df_labeled
-
-# Check command line arguments
-table_to_run = None
-if len(sys.argv) > 1:
-    table_to_run = int(sys.argv[1])
-    print(f"Running only table {table_to_run}")
-
-# Ensure the data directory exists
-os.makedirs("data", exist_ok=True)
-
-# Define the OECD data tables to fetch
-tables = [
-    {
-        "id": 1,
-        "url": "https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/..S13._T..PT_B1GQ.A?startPeriod=2014&dimensionAtObservation=AllDimensions",
-        "filename": "oecd_tax_revenue_statistics",
-        "description": "Tax Revenue Statistics (Total tax revenue as % of GDP)"
-    },
-    {
-        "id": 2,
-        "url": "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1_OUTPUT,2.0/A.AUS........V..?startPeriod=2019&dimensionAtObservation=AllDimensions",
-        "filename": "oecd_national_accounts",
-        "description": "National Accounts Main Aggregates (GDP data for Australia)"
-    },
-    {
-        "id": 3,
-        "url": "https://sdmx.oecd.org/public/rest/data/OECD.SDD.TPS,DSD_LFS@DF_IALFS_LF_Q,1.0/.LF.._Z.Y._T.Y15T64..A?startPeriod=2018&dimensionAtObservation=AllDimensions",
-        "filename": "oecd_labour_force",
-        "description": "Labour Force Statistics (Employment rates)"
-    },
-    {
-        "id": 4,
-        "url": "https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/..S13.T_5000+T_4000+T_1000+_T+T_2000..PT_B1GQ.A?startPeriod=2014&dimensionAtObservation=AllDimensions",
-        "filename": "oecd_detailed_tax_revenue",
-        "description": "Detailed Tax Revenue by Category (Multiple tax categories)"
-    }
-]
-
-# Run the specified table(s)
-for table in tables:
-    if table_to_run is None or table_to_run == table["id"]:
-        print(f"\n{'='*60}")
-        print(f"Processing Table {table['id']}: {table['description']}")
-        print(f"{'='*60}")
+    try:
+        # Read the CSV file
+        df = pd.read_csv(input_file)
+        print(f"  Original shape: {df.shape}")
+        print(f"  Columns: {list(df.columns)}")
         
-        try:
-            df = fetch_oecd_data(
-                table["url"], 
-                table["filename"], 
-                table["description"]
-            )
-            
-            print(f"✓ Successfully fetched table {table['id']}")
-            
-            # Add delay between tables to avoid rate limiting
-            if table_to_run is None and table["id"] < len(tables):
-                delay = 30 + random.uniform(10, 20)
-                print(f"Waiting {delay:.1f} seconds before next table...")
-                time.sleep(delay)
-                
-        except Exception as e:
-            print(f"✗ Error fetching table {table['id']}: {e}")
+        # Apply label mappings
+        df_labeled = apply_label_mappings(df, mappings)
+        
+        # Save the labeled version
+        df_labeled.to_csv(output_file, index=False)
+        print(f"  Saved labeled version to: {output_file}")
+        
+        # Show some examples of the transformation
+        print("  Sample transformations:")
+        for col in df.columns:
+            if col in mappings and col in ['REF_AREA', 'STANDARD_REVENUE', 'UNIT_MEASURE', 'FREQ', 'SECTOR']:
+                # Show a few examples of the transformation
+                original_values = df[col].unique()[:3]  # First 3 unique values
+                for val in original_values:
+                    if val in mappings[col]:
+                        print(f"    {col}: {val} -> {mappings[col][val]}")
+                    else:
+                        print(f"    {col}: {val} -> (no mapping found)")
+                break  # Just show one column as example
+        
+        return True
+        
+    except Exception as e:
+        print(f"  Error processing {input_file}: {e}")
+        return False
+
+def main():
+    """Main function to process all CSV files"""
+    print("=" * 60)
+    print("Applying Labels to CSV Files")
+    print("=" * 60)
+    
+    # Get the label mappings
+    print("Loading label mappings...")
+    mappings = get_comprehensive_label_mappings()
+    print(f"Loaded mappings for {len(mappings)} categories")
+    
+    # Define the data directory
+    data_dir = Path("data")
+    if not data_dir.exists():
+        print(f"Error: Data directory {data_dir} does not exist")
+        return
+    
+    # Find all CSV files in the data directory
+    csv_files = list(data_dir.glob("*.csv"))
+    print(f"\nFound {len(csv_files)} CSV files to process:")
+    for file in csv_files:
+        print(f"  - {file.name}")
+    
+    # Process each CSV file
+    successful = 0
+    failed = 0
+    
+    for csv_file in csv_files:
+        # Skip files that are already labeled
+        if "_labeled" in csv_file.name:
+            print(f"Skipping already labeled file: {csv_file.name}")
             continue
+            
+        # Create output filename
+        output_file = csv_file.parent / f"{csv_file.stem}_labeled.csv"
+        
+        # Process the file
+        if process_csv_file(csv_file, output_file, mappings):
+            successful += 1
+        else:
+            failed += 1
+        
+        print()  # Add spacing between files
+    
+    # Summary
+    print("=" * 60)
+    print("Processing Complete!")
+    print(f"Successfully processed: {successful} files")
+    print(f"Failed: {failed} files")
+    print("=" * 60)
+    
+    # List all generated files
+    print("\nGenerated labeled files:")
+    for file in data_dir.glob("*_labeled.csv"):
+        size = file.stat().st_size
+        print(f"  {file.name} ({size:,} bytes)")
 
-print(f"\n{'='*60}")
-print("Data collection completed!")
-print(f"{'='*60}")
-
-# List all generated files
-print("\nGenerated files:")
-for file in os.listdir("data"):
-    if file.endswith(".csv") and "oecd_" in file:
-        filepath = os.path.join("data", file)
-        size = os.path.getsize(filepath)
-        print(f"  {file} ({size:,} bytes)") 
+if __name__ == "__main__":
+    main() 
