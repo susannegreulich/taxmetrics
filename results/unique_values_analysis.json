@@ -1,0 +1,425 @@
+{
+  "OECD Tax Revenue Data": {
+    "file_path": "data/oecd_api_data1.csv",
+    "total_rows": 18439,
+    "total_columns": 9,
+    "columns": {
+      "TIME_PERIOD": {
+        "unique_count": 34,
+        "sample_values": [
+          2014,
+          2005,
+          2006,
+          2007,
+          2008,
+          2009,
+          2010,
+          2011,
+          2012,
+          2013
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "int64"
+      },
+      "REF_AREA": {
+        "unique_count": 141,
+        "sample_values": [
+          "NRU",
+          "KHM",
+          "COK",
+          "CUB",
+          "NIU",
+          "WSM",
+          "SOM",
+          "LKA",
+          "TLS",
+          "TKL"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "MEASURE": {
+        "unique_count": 1,
+        "sample_values": [
+          "TAX_REV"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "SECTOR": {
+        "unique_count": 1,
+        "sample_values": [
+          "S13"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "STANDARD_REVENUE": {
+        "unique_count": 5,
+        "sample_values": [
+          "T_1000",
+          "T_4000",
+          "T_2000",
+          "_T",
+          "T_5000"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "CTRY_SPECIFIC_REVENUE": {
+        "unique_count": 1,
+        "sample_values": [
+          "_T"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "UNIT_MEASURE": {
+        "unique_count": 1,
+        "sample_values": [
+          "PT_B1GQ"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "FREQ": {
+        "unique_count": 1,
+        "sample_values": [
+          "A"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "value": {
+        "unique_count": 11751,
+        "sample_values": [
+          0.0,
+          7.436,
+          7.814,
+          7.777,
+          7.729,
+          8.236,
+          8.666,
+          8.852,
+          9.085,
+          8.821
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "float64"
+      }
+    }
+  },
+  "OECD GDP Growth Data": {
+    "file_path": "data/oecd_api_data2.csv",
+    "total_rows": 19749,
+    "total_columns": 14,
+    "columns": {
+      "TIME_PERIOD": {
+        "unique_count": 34,
+        "sample_values": [
+          2014,
+          2015,
+          2016,
+          2017,
+          2018,
+          2019,
+          2020,
+          2011,
+          2012,
+          2013
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "int64"
+      },
+      "FREQ": {
+        "unique_count": 1,
+        "sample_values": [
+          "A"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "REF_AREA": {
+        "unique_count": 64,
+        "sample_values": [
+          "ISL",
+          "ITA",
+          "JPN",
+          "KOR",
+          "LTU",
+          "LUX",
+          "ESP",
+          "CHE",
+          "GBR",
+          "EA20"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "SECTOR": {
+        "unique_count": 1,
+        "sample_values": [
+          "S1"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "COUNTERPART_SECTOR": {
+        "unique_count": 1,
+        "sample_values": [
+          "S1"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "TRANSACTION": {
+        "unique_count": 3,
+        "sample_values": [
+          "B1GQ",
+          "B1G",
+          "B1GXP119"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "INSTR_ASSET": {
+        "unique_count": 1,
+        "sample_values": [
+          "_Z"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "ACTIVITY": {
+        "unique_count": 13,
+        "sample_values": [
+          "_Z",
+          "OTQ",
+          "RTU",
+          "L",
+          "C",
+          "J",
+          "M_N",
+          "A",
+          "F",
+          "GTI"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "EXPENDITURE": {
+        "unique_count": 1,
+        "sample_values": [
+          "_Z"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "UNIT_MEASURE": {
+        "unique_count": 1,
+        "sample_values": [
+          "PC"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "PRICE_BASE": {
+        "unique_count": 1,
+        "sample_values": [
+          "L"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "TRANSFORMATION": {
+        "unique_count": 1,
+        "sample_values": [
+          "G1"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "TABLE_IDENTIFIER": {
+        "unique_count": 1,
+        "sample_values": [
+          "T0101"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "value": {
+        "unique_count": 18169,
+        "sample_values": [
+          1.687215,
+          -0.001388,
+          0.296206,
+          3.21468,
+          3.772543,
+          2.623086,
+          1.520486,
+          2.349881,
+          3.194637,
+          1.438015
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "float64"
+      }
+    }
+  },
+  "OECD Labor Force Data": {
+    "file_path": "data/oecd_api_data3.csv",
+    "total_rows": 1106,
+    "total_columns": 11,
+    "columns": {
+      "TIME_PERIOD": {
+        "unique_count": 34,
+        "sample_values": [
+          1990,
+          1991,
+          1992,
+          1993,
+          1994,
+          1995,
+          1996,
+          1997,
+          1998,
+          1999
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "int64"
+      },
+      "REF_AREA": {
+        "unique_count": 47,
+        "sample_values": [
+          "JPN",
+          "USA",
+          "CAN",
+          "AUS",
+          "AUT",
+          "BEL",
+          "COL",
+          "CRI",
+          "CZE",
+          "DNK"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "MEASURE": {
+        "unique_count": 1,
+        "sample_values": [
+          "LF"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "UNIT_MEASURE": {
+        "unique_count": 1,
+        "sample_values": [
+          "PS"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "TRANSFORMATION": {
+        "unique_count": 1,
+        "sample_values": [
+          "_Z"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "ADJUSTMENT": {
+        "unique_count": 1,
+        "sample_values": [
+          "Y"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "SEX": {
+        "unique_count": 1,
+        "sample_values": [
+          "_T"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "AGE": {
+        "unique_count": 1,
+        "sample_values": [
+          "Y15T64"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "ACTIVITY": {
+        "unique_count": 1,
+        "sample_values": [
+          "_Z"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "FREQ": {
+        "unique_count": 1,
+        "sample_values": [
+          "A"
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "object"
+      },
+      "value": {
+        "unique_count": 1102,
+        "sample_values": [
+          60235.0,
+          61160.0,
+          61689.17,
+          61980.83,
+          62112.5,
+          62215.83,
+          62556.67,
+          63116.67,
+          63074.17,
+          62860.0
+        ],
+        "missing_count": 0,
+        "missing_percentage": 0.0,
+        "data_type": "float64"
+      }
+    }
+  }
+}
