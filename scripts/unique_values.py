@@ -60,42 +60,43 @@ def create_unique_values_csv(file_path: str, output_file: str):
 
 def main():
     """Main function to process all datasets."""
-    # Define data directory and files
+    # Define data directory
     data_dir = Path("data/raw")
     
-    # List of datasets to process
-    datasets = [
-        ("tax_revenues.csv", "Tax Revenues"),
-        ("gdp.csv", "GDP"), 
-        ("labor_force.csv", "Labor Force")
-    ]
+    # Check if data directory exists
+    if not data_dir.exists():
+        print(f"ERROR: Data directory {data_dir} does not exist!")
+        return
+    
+    # Find all CSV files in the data/raw directory
+    csv_files = list(data_dir.glob("*.csv"))
+    
+    if not csv_files:
+        print(f"No CSV files found in {data_dir}")
+        return
     
     print("OECD Dataset Unique Values Extraction")
     print("=" * 50)
     print("This script extracts unique values for each variable in the raw OECD datasets")
     print("and outputs them as CSV files with each column representing a dimension.")
+    print(f"Found {len(csv_files)} CSV file(s) to process:")
+    for csv_file in csv_files:
+        print(f"  - {csv_file.name}")
     print()
     
-    # Create output directory
-    os.makedirs("data/raw", exist_ok=True)
-    
-    for filename, dataset_name in datasets:
-        file_path = data_dir / filename
-        
-        if not file_path.exists():
-            print(f"WARNING: File {file_path} not found, skipping...")
-            continue
+    # Process each CSV file
+    for csv_file in csv_files:
+        dataset_name = csv_file.stem  # Get filename without extension
         
         print(f"Processing {dataset_name}...")
         
         # Create output filename
-        base_name = filename.replace('.csv', '')
-        output_csv = f"data/raw/{base_name}_unique_values.csv"
+        output_csv = data_dir / f"{dataset_name}_unique_values.csv"
         
-        create_unique_values_csv(str(file_path), output_csv)
+        create_unique_values_csv(str(csv_file), str(output_csv))
         print()
     
-    print("All CSV files created in: data/raw/")
+    print("All unique values CSV files created in: data/raw/")
 
 if __name__ == "__main__":
     main() 
