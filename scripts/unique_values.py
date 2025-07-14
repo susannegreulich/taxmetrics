@@ -77,7 +77,7 @@ def main():
     print()
     
     # Create output directory
-    os.makedirs("results/unique_values_csv", exist_ok=True)
+    os.makedirs("data/processed", exist_ok=True)
     
     for filename, dataset_name in datasets:
         file_path = data_dir / filename
@@ -90,12 +90,12 @@ def main():
         
         # Create output filename
         base_name = filename.replace('_labeled.csv', '')
-        output_csv = f"results/unique_values_csv/{base_name}_unique_values.csv"
+        output_csv = f"data/processed/{base_name}_unique_values.csv"
         
         create_unique_values_csv(str(file_path), output_csv)
         print()
     
-    print("All CSV files created in: results/unique_values_csv/")
+    print("All CSV files created in: data/processed/")
 
 if __name__ == "__main__":
     main() 
