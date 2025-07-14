@@ -3,8 +3,6 @@
 change to data/labeled. 
 processed is for unique values, removing redundant countries etc. 
 
-1. make unique values output in csv, same dimensions format as original datasets, so one table for each datasets. easiest
-to see at a glance the unique values. 
 2. find common countries in the 3 datasets, and delete data for countries not in all 3 datasets
 3. summary descriptive stats. 
 4. make the plots. 
@@ -20,9 +18,17 @@ tax link: https://data-explorer.oecd.org/vis?fs[0]=Topic%2C1%7CTaxation%23TAX%23
 tax data query: https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/..S13.T_5000+T_4000+T_2000+T_1000+_T..PT_B1GQ.A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
 tax structure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.CTP.TPS/DSD_REV_COMP_GLOBAL@DF_RSGLOBAL/2.1?references=all
 
-# GDP link: https://data-explorer.oecd.org/vis?tm=annual%20gdp%20developer&pg=0&hc[Table%20identifier]=&snb=157&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE1&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A........PC%2BUSD_PPP_PS%2BUSD_PPP..G1.T0101&pd=1990%2C2024&to[TIME_PERIOD]=false
-GDP data query: https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1...._T..PC+USD_PPP_PS+USD_PPP..G1.T0101?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
+# GDP link: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1/2.0?references=all
+GDP data query: https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1..B1GQ._Z._Z._Z.USD_PPP.V.N.T0102?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
 GDPstructure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1/2.0?references=all
+
+
+population: https://data-explorer.oecd.org/vis?tm=population&pg=0&hc[Transaction]=&snb=305&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE3&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A..S1.S1.POP.._Z..PS...&pd=1990%2C2023&to[TIME_PERIOD]=false
+data query: https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE3,2.0/A..S1.S1.POP.._Z..PS...?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
+structure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE3/2.0?references=all
+
+
+
 
 labor link: https://data-explorer.oecd.org/vis?tm=population%20labour&pg=0&snb=99&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_LFS%40DF_IALFS_LF_Q&df[ag]=OECD.SDD.TPS&df[vs]=1.0&dq=.LF.._Z.Y._T.Y15T64..Q&lom=LASTNPERIODS&lo=7&to[TIME_PERIOD]=false&vw=tb
 labor data query: https://sdmx.oecd.org/public/rest/data/OECD.SDD.TPS,DSD_LFS@DF_IALFS_LF_Q,1.0/.LF.._Z.Y._T.Y15T64..A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions

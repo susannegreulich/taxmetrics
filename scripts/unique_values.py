@@ -61,23 +61,23 @@ def create_unique_values_csv(file_path: str, output_file: str):
 def main():
     """Main function to process all datasets."""
     # Define data directory and files
-    data_dir = Path("data/labeled")
+    data_dir = Path("data/raw")
     
     # List of datasets to process
     datasets = [
-        ("tax_revenues_labeled.csv", "Tax Revenues"),
-        ("gdp_labeled.csv", "GDP"), 
-        ("labor_force_labeled.csv", "Labor Force")
+        ("tax_revenues.csv", "Tax Revenues"),
+        ("gdp.csv", "GDP"), 
+        ("labor_force.csv", "Labor Force")
     ]
     
     print("OECD Dataset Unique Values Extraction")
     print("=" * 50)
-    print("This script extracts unique values for each variable in the labeled OECD datasets")
+    print("This script extracts unique values for each variable in the raw OECD datasets")
     print("and outputs them as CSV files with each column representing a dimension.")
     print()
     
     # Create output directory
-    os.makedirs("data/processed", exist_ok=True)
+    os.makedirs("data/raw", exist_ok=True)
     
     for filename, dataset_name in datasets:
         file_path = data_dir / filename
@@ -89,13 +89,13 @@ def main():
         print(f"Processing {dataset_name}...")
         
         # Create output filename
-        base_name = filename.replace('_labeled.csv', '')
-        output_csv = f"data/processed/{base_name}_unique_values.csv"
+        base_name = filename.replace('.csv', '')
+        output_csv = f"data/raw/{base_name}_unique_values.csv"
         
         create_unique_values_csv(str(file_path), output_csv)
         print()
     
-    print("All CSV files created in: data/processed/")
+    print("All CSV files created in: data/raw/")
 
 if __name__ == "__main__":
     main() 

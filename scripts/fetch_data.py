@@ -31,7 +31,7 @@ headers = {
 STRUCTURE_URLS = {
     'tax_revenues': 'https://sdmx.oecd.org/public/rest/dataflow/OECD.CTP.TPS/DSD_REV_COMP_GLOBAL@DF_RSGLOBAL/2.1?references=all',
     'gdp': 'https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1/2.0?references=all',
-    'labor_force': 'https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.TPS/DSD_LFS@DF_IALFS_LF_Q/1.0?references=all'
+    'population': 'https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE3/2.0?references=all'
 }
 
 # Headers for structure queries
@@ -99,7 +99,7 @@ time.sleep(2)
 
 # --- Second Table: National Accounts GDP per capita and PPP ---
 print("Fetching Table 2: GDPs...")
-url2 = "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1...._T..PC+USD_PPP_PS+USD_PPP..G1.T0101?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
+url2 = "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1..B1GQ._Z._Z._Z.USD_PPP.V.N.T0102?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
 response2 = requests.get(url2, headers=headers)
 response2.raise_for_status()
 with open("data/raw/gdp.xml", "wb") as f:
@@ -113,17 +113,17 @@ print(df2.head())
 # Add delay between requests to avoid rate limiting
 time.sleep(2)
 
-# --- Third Table: Labor Force Statistics (Working-age population) ---
-print("Fetching Table 3: Labor Force Populations...")
-url3 = "https://sdmx.oecd.org/public/rest/data/OECD.SDD.TPS,DSD_LFS@DF_IALFS_LF_Q,1.0/.LF.._Z.Y._T.Y15T64..A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
+# --- Third Table: Population Statistics ---
+print("Fetching Table 3: Population...")
+url3 = "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE3,2.0/A..S1.S1.POP.._Z..PS...?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
 response3 = requests.get(url3, headers=headers)
 response3.raise_for_status()
-with open("data/raw/labor_force.xml", "wb") as f:
+with open("data/raw/population.xml", "wb") as f:
     f.write(response3.content)
-msg3 = pandasdmx.read_sdmx("data/raw/labor_force.xml")
+msg3 = pandasdmx.read_sdmx("data/raw/population.xml")
 df3 = msg3.to_pandas()
-df3.to_csv("data/raw/labor_force.csv")
-print("Saved as data/raw/labor_force.csv")
+df3.to_csv("data/raw/population.csv")
+print("Saved as data/raw/population.csv")
 print(df3.head())
 
 print("All data collection completed successfully!")
@@ -131,8 +131,8 @@ print("\n" + "=" * 60)
 print("Complete Data Collection Process Finished!")
 print("=" * 60)
 print("Files generated:")
-print("- Data CSV files: data/raw/tax_revenues.csv, data/raw/gdp.csv, data/raw/labor_force.csv")
-print("- Data XML files: data/raw/tax_revenues.xml, data/raw/gdp.xml, data/raw/labor_force.xml")
-print("- Structure XML files: data/raw/tax_revenues_structure.xml, data/raw/gdp_structure.xml, data/raw/labor_force_structure.xml")
+print("- Data CSV files: data/raw/tax_revenues.csv, data/raw/gdp.csv, data/raw/population.csv")
+print("- Data XML files: data/raw/tax_revenues.xml, data/raw/gdp.xml, data/raw/population.xml")
+print("- Structure XML files: data/raw/tax_revenues_structure.xml, data/raw/gdp_structure.xml, data/raw/population_structure.xml")
 print("\nNext step: Run label_data.py to apply labels to the CSV files")
 print("=" * 60) 
