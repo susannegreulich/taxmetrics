@@ -5,7 +5,7 @@ Comprehensive OECD Data Labeling Script
 This script performs the complete labeling process:
 1. Loads structure queries downloaded by fetch_data.py
 2. Extracts codelists from the structure files
-3. Applies label mappings to existing data CSV files
+3. Applies label mappings to filtered data CSV files in data/processed/
 
 This merges the functionality of:
 - extract_codelists.py  
@@ -76,7 +76,7 @@ def extract_dataset_codelists(structure_file, dataset_name):
             'CL_EXPENDITURE', 'CL_UNIT_MEASURE', 'CL_TRANSFORMATION', 
             'CL_TABLEID', 'CL_FREQ', 'CL_TRANSACTION'
         ],
-        'labor_force': [
+        'population': [
             'CL_AREA', 'CL_UNIT_MEASURE', 'CL_TRANSFORMATION', 'CL_ADJUSTMENT',
             'CL_SEX', 'CL_AGE', 'CL_FREQ'
         ]
@@ -128,7 +128,7 @@ def load_and_extract_all_mappings():
     datasets = {
         'tax_revenues': 'data/raw/tax_revenues_structure.xml',
         'gdp': 'data/raw/gdp_structure.xml',
-        'labor_force': 'data/raw/labor_force_structure.xml'
+        'population': 'data/raw/population_structure.xml'
     }
     
     # Load structure files and extract codelists for each dataset
@@ -244,9 +244,9 @@ def process_csv_file(input_file, output_file, fallback_mappings):
         elif 'gdp' in filename:
             mapping_file = Path("data/labeled/gdp_mappings.json")
             dataset_name = 'gdp'
-        elif 'labor' in filename:
-            mapping_file = Path("data/labeled/labor_force_mappings.json")
-            dataset_name = 'labor_force'
+        elif 'population' in filename:
+            mapping_file = Path("data/labeled/population_mappings.json")
+            dataset_name = 'population'
         else:
             mappings_to_use = fallback_mappings
             dataset_name = 'unknown'
@@ -297,13 +297,13 @@ def apply_labels_to_csv_files():
     # Load fallback mappings
     fallback_mappings = get_comprehensive_label_mappings()
     
-    # Define the data directory (now looking in data/raw for input files)
-    data_dir = Path("data/raw")
+    # Define the data directory (now looking in data/processed for input files)
+    data_dir = Path("data/processed")
     if not data_dir.exists():
         print(f"Error: Data directory {data_dir} does not exist")
         return
     
-    # Find all CSV files in the data/raw directory
+    # Find all CSV files in the data/processed directory
     csv_files = list(data_dir.glob("*.csv"))
     print(f"\nFound {len(csv_files)} CSV files to process:")
     for file in csv_files:
@@ -320,7 +320,11 @@ def apply_labels_to_csv_files():
             continue
             
         # Create output filename in the data/labeled directory
-        output_file = Path("data/labeled") / f"{csv_file.stem}_labeled.csv"
+        # Remove "_filtered" from the stem if present, then add "_labeled"
+        stem = csv_file.stem
+        if stem.endswith("_filtered"):
+            stem = stem[:-9]  # Remove "_filtered" suffix
+        output_file = Path("data/labeled") / f"{stem}_labeled.csv"
         
         # Process the file
         if process_csv_file(csv_file, output_file, fallback_mappings):
@@ -357,7 +361,7 @@ def main():
         print("Please run fetch_data.py first to download the required structure files.")
         return
     
-    # Step 2: Apply labels to CSV files
+    # Step 2: Apply labels to filtered CSV files
     apply_labels_to_csv_files()
     
     # Final summary

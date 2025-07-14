@@ -86,12 +86,12 @@ print("Fetching Table 1: Tax Revenues...")
 url1 = "https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/..S13.T_5000+T_4000+T_2000+T_1000+_T..PT_B1GQ.A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
 response1 = requests.get(url1, headers=headers)
 response1.raise_for_status()
-with open("data/raw/tax_revenues.xml", "wb") as f:
+with open("data/raw/tax_revenues_data.xml", "wb") as f:
     f.write(response1.content)
-msg1 = pandasdmx.read_sdmx("data/raw/tax_revenues.xml")
+msg1 = pandasdmx.read_sdmx("data/raw/tax_revenues_data.xml")
 df1 = msg1.to_pandas()
-df1.to_csv("data/raw/tax_revenues.csv")
-print("Saved as data/raw/tax_revenues.csv")
+df1.to_csv("data/raw/tax_revenues_raw.csv")
+print("Saved as data/raw/tax_revenues_raw.csv")
 print(df1.head())
 
 # Add delay between requests to avoid rate limiting
@@ -102,12 +102,12 @@ print("Fetching Table 2: GDPs...")
 url2 = "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1..B1GQ._Z._Z._Z.USD_PPP.V.N.T0102?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
 response2 = requests.get(url2, headers=headers)
 response2.raise_for_status()
-with open("data/raw/gdp.xml", "wb") as f:
+with open("data/raw/gdp_data.xml", "wb") as f:
     f.write(response2.content)
-msg2 = pandasdmx.read_sdmx("data/raw/gdp.xml")
+msg2 = pandasdmx.read_sdmx("data/raw/gdp_data.xml")
 df2 = msg2.to_pandas()
-df2.to_csv("data/raw/gdp.csv")
-print("Saved as data/raw/gdp.csv")
+df2.to_csv("data/raw/gdp_raw.csv")
+print("Saved as data/raw/gdp_raw.csv")
 print(df2.head())
 
 # Add delay between requests to avoid rate limiting
@@ -118,12 +118,12 @@ print("Fetching Table 3: Population...")
 url3 = "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE3,2.0/A..S1.S1.POP.._Z..PS...?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
 response3 = requests.get(url3, headers=headers)
 response3.raise_for_status()
-with open("data/raw/population.xml", "wb") as f:
+with open("data/raw/population_data.xml", "wb") as f:
     f.write(response3.content)
-msg3 = pandasdmx.read_sdmx("data/raw/population.xml")
+msg3 = pandasdmx.read_sdmx("data/raw/population_data.xml")
 df3 = msg3.to_pandas()
-df3.to_csv("data/raw/population.csv")
-print("Saved as data/raw/population.csv")
+df3.to_csv("data/raw/population_raw.csv")
+print("Saved as data/raw/population_raw.csv")
 print(df3.head())
 
 print("All data collection completed successfully!")
@@ -131,8 +131,8 @@ print("\n" + "=" * 60)
 print("Complete Data Collection Process Finished!")
 print("=" * 60)
 print("Files generated:")
-print("- Data CSV files: data/raw/tax_revenues.csv, data/raw/gdp.csv, data/raw/population.csv")
-print("- Data XML files: data/raw/tax_revenues.xml, data/raw/gdp.xml, data/raw/population.xml")
+print("- Data CSV files: data/raw/tax_revenues_raw.csv, data/raw/gdp_raw.csv, data/raw/population_raw.csv")
+print("- Data XML files: data/raw/tax_revenues_data.xml, data/raw/gdp_data.xml, data/raw/population_data.xml")
 print("- Structure XML files: data/raw/tax_revenues_structure.xml, data/raw/gdp_structure.xml, data/raw/population_structure.xml")
 print("\nNext step: Run label_data.py to apply labels to the CSV files")
 print("=" * 60) 
