@@ -1,17 +1,52 @@
 #!/usr/bin/env python3
 """
-Apply label mappings to existing CSV files.
+Apply label mappings to existing data CSV files.
 
-This script takes the identifier-label dictionary and applies it to all CSV files 
+This script takes the official OECD identifier-label dictionary and applies it to all CSV files 
 in the data directory to create human-readable labeled versions.
 """
 
 import os
 import pandas as pd
+import json
 from pathlib import Path
 
+def load_official_oecd_mappings():
+    """Load official OECD mappings from the extracted structure files"""
+    print("Loading official OECD mappings...")
+    
+    # Load mappings for each dataset
+    mappings = {}
+    
+    # Load tax revenues mappings
+    tax_file = Path("results/tax_revenues_mappings.json")
+    if tax_file.exists():
+        with open(tax_file, 'r') as f:
+            tax_mappings = json.load(f)
+        mappings['tax_revenues'] = tax_mappings
+        print(f"  Loaded tax_revenues mappings: {len(tax_mappings)} categories")
+    
+    # Load GDP mappings
+    gdp_file = Path("results/gdp_mappings.json")
+    if gdp_file.exists():
+        with open(gdp_file, 'r') as f:
+            gdp_mappings = json.load(f)
+        mappings['gdp'] = gdp_mappings
+        print(f"  Loaded gdp mappings: {len(gdp_mappings)} categories")
+    
+    # Load labor force mappings
+    labor_file = Path("results/labor_force_mappings.json")
+    if labor_file.exists():
+        with open(labor_file, 'r') as f:
+            labor_mappings = json.load(f)
+        mappings['labor_force'] = labor_mappings
+        print(f"  Loaded labor_force mappings: {len(labor_mappings)} categories")
+    
+    return mappings
+
 def get_comprehensive_label_mappings():
-    """Get comprehensive label mappings for OECD data"""
+    """Get comprehensive label mappings for OECD data (fallback to manual mappings)"""
+    print("Loading fallback manual mappings...")
     mappings = {}
     
     # Country mappings (REF_AREA) - Major OECD and non-OECD countries
@@ -210,6 +245,14 @@ def get_comprehensive_label_mappings():
         'Y': 'Previous year prices'
     }
     
+    # Common OECD codes that appear across datasets
+    common_mappings = {
+        'S1': 'Total economy',
+        '_Z': 'Not applicable',
+        '_T': 'Total',
+        '_X': 'Unspecified'
+    }
+    
     mappings['REF_AREA'] = country_mappings
     mappings['STANDARD_REVENUE'] = tax_mappings
     mappings['UNIT_MEASURE'] = unit_mappings
@@ -219,10 +262,12 @@ def get_comprehensive_label_mappings():
     mappings['TRANSACTION'] = transaction_mappings
     mappings['ACTIVITY'] = activity_mappings
     mappings['PRICE_BASE'] = price_mappings
+    mappings['COUNTERPART_SECTOR'] = common_mappings
+    mappings['EXPENDITURE'] = common_mappings
     
     return mappings
 
-def apply_label_mappings(df, mappings):
+def apply_label_mappings(df, mappings, fallback_mappings=None):
     """Apply label mappings to DataFrame columns"""
     df_labeled = df.copy()
     
@@ -231,10 +276,13 @@ def apply_label_mappings(df, mappings):
         if col in mappings:
             print(f"    Applying labels to {col}")
             df_labeled[col] = df_labeled[col].map(mappings[col]).fillna(df_labeled[col])
+        elif fallback_mappings and col in fallback_mappings:
+            print(f"    Applying fallback labels to {col}")
+            df_labeled[col] = df_labeled[col].map(fallback_mappings[col]).fillna(df_labeled[col])
     
     return df_labeled
 
-def process_csv_file(input_file, output_file, mappings):
+def process_csv_file(input_file, output_file, dataset_mappings, fallback_mappings):
     """Process a single CSV file and apply label mappings"""
     print(f"Processing: {input_file}")
     
@@ -244,8 +292,25 @@ def process_csv_file(input_file, output_file, mappings):
         print(f"  Original shape: {df.shape}")
         print(f"  Columns: {list(df.columns)}")
         
+        # Determine which mappings to use based on filename
+        filename = input_file.name.lower()
+        if 'tax' in filename:
+            mappings_to_use = dataset_mappings.get('tax_revenues', fallback_mappings)
+            dataset_name = 'tax_revenues'
+        elif 'gdp' in filename:
+            mappings_to_use = dataset_mappings.get('gdp', fallback_mappings)
+            dataset_name = 'gdp'
+        elif 'labor' in filename:
+            mappings_to_use = dataset_mappings.get('labor_force', fallback_mappings)
+            dataset_name = 'labor_force'
+        else:
+            mappings_to_use = fallback_mappings
+            dataset_name = 'unknown'
+        
+        print(f"  Using mappings for dataset: {dataset_name}")
+        
         # Apply label mappings
-        df_labeled = apply_label_mappings(df, mappings)
+        df_labeled = apply_label_mappings(df, mappings_to_use, fallback_mappings)
         
         # Save the labeled version
         df_labeled.to_csv(output_file, index=False)
@@ -254,12 +319,12 @@ def process_csv_file(input_file, output_file, mappings):
         # Show some examples of the transformation
         print("  Sample transformations:")
         for col in df.columns:
-            if col in mappings and col in ['REF_AREA', 'STANDARD_REVENUE', 'UNIT_MEASURE', 'FREQ', 'SECTOR']:
+            if col in mappings_to_use and col in ['REF_AREA', 'STANDARD_REVENUE', 'UNIT_MEASURE', 'FREQ', 'SECTOR', 'CTRY_SPECIFIC_REVENUE', 'COUNTERPART_SECTOR', 'SEX', 'AGE']:
                 # Show a few examples of the transformation
                 original_values = df[col].unique()[:3]  # First 3 unique values
                 for val in original_values:
-                    if val in mappings[col]:
-                        print(f"    {col}: {val} -> {mappings[col][val]}")
+                    if val in mappings_to_use[col]:
+                        print(f"    {col}: {val} -> {mappings_to_use[col][val]}")
                     else:
                         print(f"    {col}: {val} -> (no mapping found)")
                 break  # Just show one column as example
@@ -273,13 +338,14 @@ def process_csv_file(input_file, output_file, mappings):
 def main():
     """Main function to process all CSV files"""
     print("=" * 60)
-    print("Applying Labels to CSV Files")
+    print("Applying Official OECD Labels to CSV Files")
     print("=" * 60)
     
-    # Get the label mappings
-    print("Loading label mappings...")
-    mappings = get_comprehensive_label_mappings()
-    print(f"Loaded mappings for {len(mappings)} categories")
+    # Load official OECD mappings
+    dataset_mappings = load_official_oecd_mappings()
+    
+    # Load fallback mappings
+    fallback_mappings = get_comprehensive_label_mappings()
     
     # Define the data directory
     data_dir = Path("data")
@@ -307,7 +373,7 @@ def main():
         output_file = csv_file.parent / f"{csv_file.stem}_labeled.csv"
         
         # Process the file
-        if process_csv_file(csv_file, output_file, mappings):
+        if process_csv_file(csv_file, output_file, dataset_mappings, fallback_mappings):
             successful += 1
         else:
             failed += 1

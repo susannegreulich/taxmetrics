@@ -1,6 +1,40 @@
 # Todos: 
 
-data
+data:
+
+queries:
+
+# Data Source URLS
+
+# GDP: https://data-explorer.oecd.org/vis?tm=annual%20gdp%20developer&pg=0&hc[Table%20identifier]=&snb=157&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE1&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A........PC%2BUSD_PPP_PS%2BUSD_PPP..G1.T0101&pd=1990%2C2024&to[TIME_PERIOD]=false
+data: https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1...._T..PC+USD_PPP_PS+USD_PPP..G1.T0101?startPeriod=1990&endPeriod=2024&dimensionAtObservation=AllDimensions
+structure: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1/2.0?references=all
+
+tax link: https://data-explorer.oecd.org/vis?fs[0]=Topic%2C1%7CTaxation%23TAX%23%7CGlobal%20tax%20revenues%23TAX_GTR%23&pg=0&fc=Topic&bp=true&snb=155&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_REV_COMP_GLOBAL%40DF_RSGLOBAL&df[ag]=OECD.CTP.TPS&df[vs]=2.1&dq=..S13._T..PT_B1GQ.A&lom=LASTNPERIODS&lo=10&to[TIME_PERIOD]=false
+tax data: https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/...T_5000+T_4000+T_2000+T_1000+_T..PT_B1GQ.A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
+tax structure: https://sdmx.oecd.org/public/rest/dataflow/OECD.CTP.TPS/DSD_REV_COMP_GLOBAL@DF_RSGLOBAL/2.1?references=all
+
+labor link: https://data-explorer.oecd.org/vis?tm=population%20labour&pg=0&snb=99&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_LFS%40DF_IALFS_LF_Q&df[ag]=OECD.SDD.TPS&df[vs]=1.0&dq=.LF.._Z.Y._T.Y15T64..Q&lom=LASTNPERIODS&lo=7&to[TIME_PERIOD]=false&vw=tb
+labor data: https://sdmx.oecd.org/public/rest/data/OECD.SDD.TPS,DSD_LFS@DF_IALFS_LF_Q,1.0/.LF.._Z.Y._T.Y15T64..A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
+labor structure: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.TPS/DSD_LFS@DF_IALFS_LF_Q/1.0?references=all
+
+
+
+gdp output table link: https://data-explorer.oecd.org/vis?tm=annual%20gdp&pg=0&fc=Measure&snb=317&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE1_OUTPUT&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A......_T..USD_EXC.V..&pd=1990%2C2023&to[TIME_PERIOD]=false&vw=tb
+gdp data:  https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1_OUTPUT,2.0/A......_T..USD_EXC.V..?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
+gdp structure: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1_OUTPUT/2.0?references=all
+
+
+make the unique values script output the unique values in csv, 1 table for each data set. ie exact same 'dimensions' as 
+original datasets, but only with unique values. 
+
+
+
+1. label ALL identifiers. still some left. 
+2. get data for more countries. 
+
+years correct
+the right tax CATEGORies, RIGHT NOW, property and social securuity missing. 
 
 Tax Revenues Labeled Data (18,439 rows, 9 columns)
 Key Variables with All Unique Values:
@@ -13,6 +47,7 @@ CTRY_SPECIFIC_REVENUE: 1 value - 'Total'
 UNIT_MEASURE: 1 value - 'Percentage of GDP'
 FREQ: 1 value - 'Annual'
 value: 11,751 unique tax revenue percentages (0.0% to 146.8%)
+
 GDP Labeled Data (19,749 rows, 14 columns)
 Key Variables with All Unique Values:
 TIME_PERIOD: 34 years (1990-2023)
@@ -21,6 +56,8 @@ TRANSACTION: 3 types - 'Gross domestic product', 'Gross national income', 'Gross
 ACTIVITY: 13 categories including 'Total economy', 'Agriculture', 'Industry', 'Services', etc.
 UNIT_MEASURE: 1 value - 'Percentage change'
 value: 18,169 unique GDP growth rates (-7.4% to 24.0%)
+
+
 Labor Force Labeled Data (1,106 rows, 11 columns)
 Key Variables with All Unique Values:
 TIME_PERIOD: 34 years (1990-2023)
