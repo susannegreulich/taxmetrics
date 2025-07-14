@@ -1,57 +1,57 @@
-TIME_PERIOD,FREQ,REF_AREA,SECTOR,COUNTERPART_SECTOR,TRANSACTION,INSTR_ASSET,ACTIVITY,EXPENDITURE,UNIT_MEASURE,PRICE_BASE,TRANSFORMATION,TABLE_IDENTIFIER
-1990,Annual,Argentina,Total economy,Total economy,Gross domestic product,Not applicable,Not applicable,Not applicable,"US dollars, PPP converted",V,Non transformed data,T0102
-1991,,Australia,,,,,,,,,,
-1992,,Austria,,,,,,,,,,
-1993,,Belgium,,,,,,,,,,
-1994,,Brazil,,,,,,,,,,
-1995,,Bulgaria,,,,,,,,,,
-1996,,Cabo Verde,,,,,,,,,,
-1997,,Cameroon,,,,,,,,,,
-1998,,Canada,,,,,,,,,,
-1999,,Chile,,,,,,,,,,
-2000,,China (People’s Republic of),,,,,,,,,,
-2001,,Colombia,,,,,,,,,,
-2002,,Costa Rica,,,,,,,,,,
-2003,,Croatia,,,,,,,,,,
-2004,,Czechia,,,,,,,,,,
-2005,,Denmark,,,,,,,,,,
-2006,,Estonia,,,,,,,,,,
-2007,,Finland,,,,,,,,,,
-2008,,France,,,,,,,,,,
-2009,,Georgia,,,,,,,,,,
-2010,,Germany,,,,,,,,,,
-2011,,Greece,,,,,,,,,,
-2012,,Hong Kong (China),,,,,,,,,,
-2013,,Hungary,,,,,,,,,,
-2014,,Iceland,,,,,,,,,,
-2015,,Indonesia,,,,,,,,,,
-2016,,Ireland,,,,,,,,,,
-2017,,Israel,,,,,,,,,,
-2018,,Italy,,,,,,,,,,
-2019,,Japan,,,,,,,,,,
-2020,,Korea,,,,,,,,,,
-2021,,Latvia,,,,,,,,,,
-2022,,Lithuania,,,,,,,,,,
-2023,,Luxembourg,,,,,,,,,,
-,,Madagascar,,,,,,,,,,
-,,Malta,,,,,,,,,,
-,,Mexico,,,,,,,,,,
-,,Morocco,,,,,,,,,,
-,,Netherlands,,,,,,,,,,
-,,New Zealand,,,,,,,,,,
-,,Norway,,,,,,,,,,
-,,Poland,,,,,,,,,,
-,,Portugal,,,,,,,,,,
-,,Romania,,,,,,,,,,
-,,Senegal,,,,,,,,,,
-,,Singapore,,,,,,,,,,
-,,Slovak Republic,,,,,,,,,,
-,,Slovenia,,,,,,,,,,
-,,South Africa,,,,,,,,,,
-,,Spain,,,,,,,,,,
-,,Sweden,,,,,,,,,,
-,,Switzerland,,,,,,,,,,
-,,Türkiye,,,,,,,,,,
-,,United Kingdom,,,,,,,,,,
-,,United States,,,,,,,,,,
-,,Zambia,,,,,,,,,,
+TIME_PERIOD,REF_AREA
+1990,Argentina
+1991,Australia
+1992,Austria
+1993,Belgium
+1994,Brazil
+1995,Bulgaria
+1996,Cabo Verde
+1997,Cameroon
+1998,Canada
+1999,Chile
+2000,China (People’s Republic of)
+2001,Colombia
+2002,Costa Rica
+2003,Croatia
+2004,Czechia
+2005,Denmark
+2006,Estonia
+2007,Finland
+2008,France
+2009,Georgia
+2010,Germany
+2011,Greece
+2012,Hong Kong (China)
+2013,Hungary
+2014,Iceland
+2015,Indonesia
+2016,Ireland
+2017,Israel
+2018,Italy
+2019,Japan
+2020,Korea
+2021,Latvia
+2022,Lithuania
+2023,Luxembourg
+,Madagascar
+,Malta
+,Mexico
+,Morocco
+,Netherlands
+,New Zealand
+,Norway
+,Poland
+,Portugal
+,Romania
+,Senegal
+,Singapore
+,Slovak Republic
+,Slovenia
+,South Africa
+,Spain
+,Sweden
+,Switzerland
+,Türkiye
+,United Kingdom
+,United States
+,Zambia

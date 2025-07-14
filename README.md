@@ -20,9 +20,9 @@ taxmetrics/
 │   ├── analysis/        # Tax analysis functions
 │   ├── visualization/   # Plotting and charts
 │   └── data_collection/ # OECD data collection
-├── data/               # OECD data and processed datasets
+├── data/               # OECD data and filtered datasets
 │   ├── raw/            # Raw OECD data files
-│   └── processed/      # Analysis-ready datasets
+│   └── filtered/      # Analysis-ready datasets
 ├── scripts/            # Analysis and data collection scripts
 ├── results/            # Generated analysis reports and visualizations
 ├── config/             # Configuration files
@@ -163,7 +163,7 @@ revenue_flat = calculator.calculate_revenue(flat, income_distribution)
 ### Real Data Analysis
 ```bash
 # Run analysis using real OECD data
-python3 scripts/analysis.py --type real --data-file data/processed/analysis_ready_data.csv
+python3 scripts/analysis.py --type real --data-file data/filtered/analysis_ready_data.csv
 
 # Comprehensive data collection examples
 python3 scripts/fetch_comprehensive_data.py --mode comprehensive
@@ -193,7 +193,7 @@ All tax data is sourced from OECD databases:
 - `results/real_data_tax_burden_comparison.html` - Interactive chart showing tax burden comparisons across countries
 
 ### Data Files
-- `data/processed/analysis_ready_data.csv` - Processed OECD data ready for analysis
+- `data/filtered/analysis_ready_data.csv` - Filtered OECD data ready for analysis
 - `data/raw/` - Raw OECD data files (revenue statistics, tax rates, tax structures)
 
 ## Contributing

@@ -303,7 +303,7 @@ class TaxDataProcessor:
         return summaries
     
     def save_processed_data(self, data: Dict[str, pd.DataFrame], 
-                          output_dir: str = "data/processed") -> None:
+                          output_dir: str = "data/filtered") -> None:
         """
         Save processed data to files.
         

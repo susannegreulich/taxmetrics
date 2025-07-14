@@ -429,8 +429,8 @@ def main():
     parser = argparse.ArgumentParser(description='Run tax policy analysis using real OECD data')
     parser.add_argument('--type', choices=['oecd', 'real', 'both'], default='both',
                        help='Type of analysis to run (default: both)')
-    parser.add_argument('--data-file', type=str, default='data/processed/analysis_ready_data.csv',
-                       help='Path to analysis-ready data file (default: data/processed/analysis_ready_data.csv)')
+    parser.add_argument('--data-file', type=str, default='data/filtered/analysis_ready_data.csv',
+                       help='Path to analysis-ready data file (default: data/filtered/analysis_ready_data.csv)')
     parser.add_argument('--output', type=str, default='tax_analysis_report.md',
                        help='Output filename for the CSV report (default: tax_analysis_report.csv)')
     

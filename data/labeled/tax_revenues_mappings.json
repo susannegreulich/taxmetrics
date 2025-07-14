@@ -6650,5 +6650,9 @@
     "SZV": "General government and institutions of the European Union (ESA GFS concept)",
     "S2": "Rest of the world",
     "_T": "Total - all sectors"
+  },
+  "MEASURE": {
+    "TAX_REV": "Tax revenue",
+    "LF": "Labour force"
   }
 }

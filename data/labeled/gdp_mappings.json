@@ -468,7 +468,9 @@
     "IO": "International organisations",
     "D": "Domestic (home or reference area)",
     "WXD": "Rest of the world",
-    "_Z": "Not applicable"
+    "_Z": "Not applicable",
+    "S1": "Total economy",
+    "V": "Current prices"
   },
   "SECTOR": {
     "_Z": "Not applicable",
@@ -683,7 +685,13 @@
     "SZP": "Other than general government, clearing and settlement organisations and other financial institutions",
     "SZU": "Institutions of the European Union (ESA GFS concept)",
     "SZV": "General government and institutions of the European Union (ESA GFS concept)",
-    "S2": "Rest of the world"
+    "S2": "Rest of the world",
+    "V": "Current prices"
+  },
+  "COUNTERPART_SECTOR": {
+    "S1": "Total economy",
+    "_Z": "Not applicable",
+    "V": "Current prices"
   },
   "INSTR_ASSET": {
     "_Z": "Not applicable",
@@ -869,7 +877,14 @@
     "N211121N": "Land underlying buildings other than dwellings, net",
     "N211121G": "Land underlying buildings other than dwellings, gross",
     "N21111N": "Land underlying dwellings, net",
-    "N21111G": "Land underlying dwellings, gross"
+    "N21111G": "Land underlying dwellings, gross",
+    "S1": "Total economy",
+    "V": "Current prices"
+  },
+  "EXPENDITURE": {
+    "_Z": "Not applicable",
+    "S1": "Total economy",
+    "V": "Current prices"
   },
   "UNIT_MEASURE": {
     "BBL_US": "Barrels",
@@ -1486,7 +1501,10 @@
     "FCTR_D5": "Factor of decile 5",
     "IX": "Index",
     "GR": "Growth rate",
-    "_X": "Unspecified"
+    "_X": "Unspecified",
+    "_Z": "Not applicable",
+    "S1": "Total economy",
+    "V": "Current prices"
   },
   "TRANSFORMATION": {
     "A1": "Average, period on period",
@@ -1547,9 +1565,11 @@
     "MIX": "Multilateral index",
     "MIX_1": "Multilateral index rebased to 1",
     "MIX_100": "Multilateral index rebased to 100",
-    "_Z": "Not applicable"
+    "_Z": "Not applicable",
+    "S1": "Total economy",
+    "V": "Current prices"
   },
-  "TABLEID": {
+  "TABLE_IDENTIFIER": {
     "PSD": "Table PSD - Public sector debt",
     "R15_FIN_SF": "G-20 recommendation 15 framework - financial stocks and flows",
     "R15_NONFIN_S": "G-20 recommendation 15 framework - stocks of non-financial assets",
@@ -1629,7 +1649,10 @@
     "T7II": "Table 7II - Institutional investors' assets and liabilities",
     "TSB720": "Table SB720\u00a0-\u00a0Non-bank financial intermediation (financial stocks), non-consolidated",
     "T001": "Table 001 - Exchange rates and PPPs",
-    "T750": "Government debt in nominal values, consolidated"
+    "T750": "Government debt in nominal values, consolidated",
+    "_Z": "Not applicable",
+    "S1": "Total economy",
+    "V": "Current prices"
   },
   "FREQ": {
     "A": "Annual",
@@ -1665,7 +1688,9 @@
     "OM": "Occasional monthly",
     "_O": "Other",
     "_U": "Unspecified",
-    "_Z": "Not applicable"
+    "_Z": "Not applicable",
+    "S1": "Total economy",
+    "V": "Current prices"
   },
   "TRANSACTION": {
     "_X": "Unspecified",
@@ -1975,6 +2000,31 @@
     "SA5": "Use of disposable income account",
     "SA6": "Capital account",
     "SA61": "Changes in net worth due to saving and capital transfers account",
-    "SA62": "Acquisition of non-financial assets account"
+    "SA62": "Acquisition of non-financial assets account",
+    "S1": "Total economy",
+    "V": "Current prices"
+  },
+  "ACTIVITY": {
+    "_Z": "Not applicable",
+    "_T": "Total",
+    "A": "Agriculture, forestry and fishing",
+    "BTE": "Business services",
+    "C": "Manufacturing",
+    "F": "Construction",
+    "GTI": "Goods and services",
+    "J": "Information and communication",
+    "K": "Financial and insurance activities",
+    "L": "Real estate activities",
+    "M_N": "Professional, scientific and technical activities",
+    "OTQ": "Other activities",
+    "RTU": "Real estate, transport and utilities",
+    "S1": "Total economy",
+    "V": "Current prices"
+  },
+  "PRICE_BASE": {
+    "V": "Current prices",
+    "L": "Laspeyres",
+    "_Z": "Not applicable",
+    "S1": "Total economy"
   }
 }
