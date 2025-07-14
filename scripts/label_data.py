@@ -1,227 +1,172 @@
 #!/usr/bin/env python3
 """
-Apply label mappings to existing data CSV files.
+Comprehensive OECD Data Labeling Script
 
-This script takes the official OECD identifier-label dictionary and applies it to all CSV files 
-in the data directory to create human-readable labeled versions.
+This script performs the complete labeling process:
+1. Loads structure queries downloaded by fetch_data.py
+2. Extracts codelists from the structure files
+3. Applies label mappings to existing data CSV files
+
+This merges the functionality of:
+- extract_codelists.py  
+- label_data.py
+
+Note: Structure queries should be downloaded first using fetch_data.py
 """
 
+import xml.etree.ElementTree as ET
+import json
 import os
 import pandas as pd
-import json
 from pathlib import Path
 
-def load_official_oecd_mappings():
-    """Load official OECD mappings from the extracted structure files"""
-    print("Loading official OECD mappings...")
+def extract_codelist_from_xml(xml_file, codelist_id):
+    """Extract a specific codelist from the XML structure file"""
+    print(f"  Extracting codelist: {codelist_id}")
     
-    # Load mappings for each dataset
-    mappings = {}
+    try:
+        # Parse the XML file
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+        
+        # Define namespaces
+        namespaces = {
+            'structure': 'http://www.sdmx.org/resources/sdmxml/schemas/v2_1/structure',
+            'common': 'http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common',
+            'xml': 'http://www.w3.org/XML/1998/namespace'
+        }
+        
+        # Find the codelist
+        codelist = root.find(f'.//structure:Codelist[@id="{codelist_id}"]', namespaces)
+        
+        if codelist is None:
+            print(f"    Codelist {codelist_id} not found")
+            return {}
+        
+        # Extract codes and their names
+        codes = {}
+        for code in codelist.findall('.//structure:Code', namespaces):
+            code_id = code.get('id')
+            name_elem = code.find('.//common:Name[@xml:lang="en"]', namespaces)
+            
+            if name_elem is not None:
+                codes[code_id] = name_elem.text
+            else:
+                codes[code_id] = code_id  # Fallback to code ID if no name found
+        
+        print(f"    Found {len(codes)} codes")
+        return codes
+        
+    except Exception as e:
+        print(f"    Error extracting codelist {codelist_id}: {e}")
+        return {}
+
+def extract_dataset_codelists(structure_file, dataset_name):
+    """Extract relevant codelists for a specific dataset"""
+    print(f"Extracting codelists for {dataset_name}...")
     
-    # Load tax revenues mappings
-    tax_file = Path("results/tax_revenues_mappings.json")
-    if tax_file.exists():
-        with open(tax_file, 'r') as f:
-            tax_mappings = json.load(f)
-        mappings['tax_revenues'] = tax_mappings
-        print(f"  Loaded tax_revenues mappings: {len(tax_mappings)} categories")
+    # Define which codelists are relevant for each dataset
+    dataset_codelists = {
+        'tax_revenues': [
+            'CL_AREA', 'CL_STANDARD_REVENUE', 'CL_CTRY_SPECIFIC_REVENUE', 
+            'CL_UNIT_MEASURE', 'CL_FREQ', 'CL_SECTOR'
+        ],
+        'gdp': [
+            'CL_AREA', 'CL_SECTOR', 'CL_COUNTERPART_SECTOR', 'CL_INSTR_ASSET',
+            'CL_EXPENDITURE', 'CL_UNIT_MEASURE', 'CL_TRANSFORMATION', 
+            'CL_TABLEID', 'CL_FREQ', 'CL_TRANSACTION'
+        ],
+        'labor_force': [
+            'CL_AREA', 'CL_UNIT_MEASURE', 'CL_TRANSFORMATION', 'CL_ADJUSTMENT',
+            'CL_SEX', 'CL_AGE', 'CL_FREQ'
+        ]
+    }
     
-    # Load GDP mappings
-    gdp_file = Path("results/gdp_mappings.json")
-    if gdp_file.exists():
-        with open(gdp_file, 'r') as f:
-            gdp_mappings = json.load(f)
-        mappings['gdp'] = gdp_mappings
-        print(f"  Loaded gdp mappings: {len(gdp_mappings)} categories")
+    codelists = {}
+    relevant_codelists = dataset_codelists.get(dataset_name, [])
     
-    # Load labor force mappings
-    labor_file = Path("results/labor_force_mappings.json")
-    if labor_file.exists():
-        with open(labor_file, 'r') as f:
-            labor_mappings = json.load(f)
-        mappings['labor_force'] = labor_mappings
-        print(f"  Loaded labor_force mappings: {len(labor_mappings)} categories")
+    for codelist_id in relevant_codelists:
+        codes = extract_codelist_from_xml(structure_file, codelist_id)
+        if codes:
+            # Convert codelist ID to mapping name
+            mapping_name = codelist_id.replace('CL_', '')
+            codelists[mapping_name] = codes
     
-    return mappings
+    return codelists
+
+def load_and_extract_all_mappings():
+    """Load existing structure files and extract codelists for all datasets"""
+    print("=" * 60)
+    print("Step 1: Loading Structure Files and Extracting Codelists")
+    print("=" * 60)
+    
+    # Ensure data/processed directory exists
+    Path("data/processed").mkdir(parents=True, exist_ok=True)
+    
+    all_dataset_mappings = {}
+    
+    # Define the datasets and their structure files (now in data/raw)
+    datasets = {
+        'tax_revenues': 'data/raw/tax_revenues_structure.xml',
+        'gdp': 'data/raw/gdp_structure.xml',
+        'labor_force': 'data/raw/labor_force_structure.xml'
+    }
+    
+    # Load structure files and extract codelists for each dataset
+    for dataset_name, structure_file_path in datasets.items():
+        print(f"\n{'='*20} {dataset_name.upper()} {'='*20}")
+        
+        structure_file = Path(structure_file_path)
+        
+        if structure_file.exists():
+            # Extract codelists for this dataset
+            codelists = extract_dataset_codelists(structure_file, dataset_name)
+            all_dataset_mappings[dataset_name] = codelists
+            
+            # Save individual dataset mappings
+            output_file = Path(f"data/processed/{dataset_name}_mappings.json")
+            with open(output_file, 'w') as f:
+                json.dump(codelists, f, indent=2)
+            print(f"  Saved {dataset_name} mappings to: {output_file}")
+            
+            # Print summary for this dataset
+            print(f"\n  {dataset_name} Summary:")
+            for mapping_name, codes in codelists.items():
+                print(f"    {mapping_name}: {len(codes)} codes")
+        else:
+            print(f"  Structure file not found: {structure_file}")
+            print(f"  Please run fetch_data.py first to download structure files")
+            return None
+    
+    # Save combined mappings
+    combined_file = Path("data/processed/all_datasets_mappings.json")
+    with open(combined_file, 'w') as f:
+        json.dump(all_dataset_mappings, f, indent=2)
+    
+    print(f"\nSaved combined mappings to: {combined_file}")
+    
+    return all_dataset_mappings
 
 def get_comprehensive_label_mappings():
-    """Get comprehensive label mappings for OECD data (fallback to manual mappings)"""
-    print("Loading fallback manual mappings...")
+    """Get optimized fallback label mappings for OECD data (only includes necessary mappings)"""
+    print("Loading optimized fallback manual mappings...")
     mappings = {}
     
-    # Country mappings (REF_AREA) - Major OECD and non-OECD countries
-    country_mappings = {
-        # OECD Countries
-        'AUS': 'Australia', 'AUT': 'Austria', 'BEL': 'Belgium', 'CAN': 'Canada',
-        'CHE': 'Switzerland', 'CHL': 'Chile', 'COL': 'Colombia', 'CZE': 'Czech Republic',
-        'DNK': 'Denmark', 'EST': 'Estonia', 'FIN': 'Finland', 'FRA': 'France',
-        'DEU': 'Germany', 'GRC': 'Greece', 'HUN': 'Hungary', 'ISL': 'Iceland',
-        'IRL': 'Ireland', 'ISR': 'Israel', 'ITA': 'Italy', 'JPN': 'Japan',
-        'KOR': 'Korea', 'LVA': 'Latvia', 'LTU': 'Lithuania', 'LUX': 'Luxembourg',
-        'MEX': 'Mexico', 'NLD': 'Netherlands', 'NZL': 'New Zealand', 'NOR': 'Norway',
-        'POL': 'Poland', 'PRT': 'Portugal', 'SVK': 'Slovak Republic', 'SVN': 'Slovenia',
-        'ESP': 'Spain', 'SWE': 'Sweden', 'TUR': 'Turkey', 'GBR': 'United Kingdom',
-        'USA': 'United States',
-        
-        # Major Non-OECD Countries
-        'ARG': 'Argentina', 'BRA': 'Brazil', 'CHN': 'China', 'CRI': 'Costa Rica',
-        'IND': 'India', 'IDN': 'Indonesia', 'PER': 'Peru', 'RUS': 'Russian Federation',
-        'ZAF': 'South Africa', 'THA': 'Thailand', 'VNM': 'Vietnam',
-        
-        # Regional Aggregates
-        'OECD': 'OECD Total', 'OECD_REP': 'OECD Representative Countries',
-        'EU27_2020': 'European Union (27 countries)', 'EU15': 'European Union (15 countries)',
-        'EA20': 'Euro Area (20 countries)', 'G20': 'G20 Countries',
-        
-        # Other Countries
-        'AZE': 'Azerbaijan', 'BGR': 'Bulgaria', 'HRV': 'Croatia', 'CYP': 'Cyprus',
-        'GEO': 'Georgia', 'HKG': 'Hong Kong', 'KAZ': 'Kazakhstan', 'MDA': 'Moldova',
-        'MNE': 'Montenegro', 'MKD': 'North Macedonia', 'ROU': 'Romania', 'SRB': 'Serbia',
-        'UKR': 'Ukraine', 'ALB': 'Albania', 'ARM': 'Armenia', 'ATG': 'Antigua and Barbuda',
-        'BHS': 'Bahamas', 'BRB': 'Barbados', 'BLZ': 'Belize', 'BOL': 'Bolivia',
-        'BTN': 'Bhutan', 'BWA': 'Botswana', 'BFA': 'Burkina Faso', 'BGD': 'Bangladesh',
-        'CIV': "Côte d'Ivoire", 'CMR': 'Cameroon', 'COD': 'Democratic Republic of the Congo',
-        'COG': 'Republic of the Congo', 'COK': 'Cook Islands', 'CPV': 'Cape Verde',
-        'CUB': 'Cuba', 'DOM': 'Dominican Republic', 'ECU': 'Ecuador', 'EGY': 'Egypt',
-        'FJI': 'Fiji', 'GAB': 'Gabon', 'GHA': 'Ghana', 'GIN': 'Guinea', 'GNQ': 'Equatorial Guinea',
-        'GTM': 'Guatemala', 'GUY': 'Guyana', 'HND': 'Honduras', 'JAM': 'Jamaica',
-        'KEN': 'Kenya', 'KGZ': 'Kyrgyzstan', 'KHM': 'Cambodia', 'KIR': 'Kiribati',
-        'LAO': 'Lao People\'s Democratic Republic', 'LCA': 'Saint Lucia', 'LIE': 'Liechtenstein',
-        'LKA': 'Sri Lanka', 'LSO': 'Lesotho', 'MAR': 'Morocco', 'MDG': 'Madagascar',
-        'MDV': 'Maldives', 'MHL': 'Marshall Islands', 'MLI': 'Mali', 'MLT': 'Malta',
-        'MNG': 'Mongolia', 'MOZ': 'Mozambique', 'MRT': 'Mauritania', 'MUS': 'Mauritius',
-        'MWI': 'Malawi', 'MYS': 'Malaysia', 'NAM': 'Namibia', 'NER': 'Niger',
-        'NGA': 'Nigeria', 'NIC': 'Nicaragua', 'NIU': 'Niue', 'NRU': 'Nauru',
-        'PAK': 'Pakistan', 'PAN': 'Panama', 'PHL': 'Philippines', 'PNG': 'Papua New Guinea',
-        'PRY': 'Paraguay', 'RWA': 'Rwanda', 'SEN': 'Senegal', 'SGP': 'Singapore',
-        'SLB': 'Solomon Islands', 'SLE': 'Sierra Leone', 'SLV': 'El Salvador',
-        'SOM': 'Somalia', 'SWZ': 'Eswatini', 'SYC': 'Seychelles', 'TCD': 'Chad',
-        'TGO': 'Togo', 'TKL': 'Tokelau', 'TLS': 'Timor-Leste', 'TTO': 'Trinidad and Tobago',
-        'TUN': 'Tunisia', 'UGA': 'Uganda', 'URY': 'Uruguay', 'VEN': 'Venezuela',
-        'VUT': 'Vanuatu', 'WSM': 'Samoa', 'ZMB': 'Zambia'
-    }
-    
-    # Tax category mappings (STANDARD_REVENUE)
-    tax_mappings = {
-        '_T': 'Total tax revenue',
-        'T_1000': 'Taxes on income, profits and capital gains',
-        'T_1100': 'Taxes on income, profits and capital gains of individuals',
-        'T_1110': 'Taxes on income, profits and capital gains of individuals',
-        'T_1120': 'Taxes on income, profits and capital gains of individuals',
-        'T_1200': 'Taxes on income, profits and capital gains of corporations',
-        'T_1210': 'Taxes on income, profits and capital gains of corporations',
-        'T_1220': 'Taxes on income, profits and capital gains of corporations',
-        'T_1300': 'Taxes on income, profits and capital gains',
-        'T_2000': 'Social security contributions',
-        'T_2100': 'Social security contributions paid by employees',
-        'T_2110': 'Social security contributions paid by employees',
-        'T_2120': 'Social security contributions paid by employees',
-        'T_2200': 'Social security contributions paid by employers',
-        'T_2210': 'Social security contributions paid by employers',
-        'T_2220': 'Social security contributions paid by employers',
-        'T_2300': 'Social security contributions paid by self-employed or non-employed',
-        'T_2310': 'Social security contributions paid by self-employed or non-employed',
-        'T_2320': 'Social security contributions paid by self-employed or non-employed',
-        'T_2400': 'Social security contributions',
-        'T_2410': 'Social security contributions',
-        'T_2420': 'Social security contributions',
-        'T_3000': 'Taxes on payroll and workforce',
-        'T_4000': 'Taxes on property',
-        'T_4100': 'Recurrent taxes on immovable property',
-        'T_4110': 'Recurrent taxes on immovable property',
-        'T_4120': 'Recurrent taxes on immovable property',
-        'T_4200': 'Recurrent taxes on net wealth',
-        'T_4210': 'Recurrent taxes on net wealth',
-        'T_4220': 'Recurrent taxes on net wealth',
-        'T_4300': 'Estate, inheritance and gift taxes',
-        'T_4310': 'Estate, inheritance and gift taxes',
-        'T_4320': 'Estate, inheritance and gift taxes',
-        'T_4400': 'Taxes on financial and capital transactions',
-        'T_4500': 'Non-recurrent taxes',
-        'T_4510': 'Non-recurrent taxes',
-        'T_4520': 'Non-recurrent taxes',
-        'T_4600': 'Other recurrent taxes on property',
-        'T_5000': 'Taxes on goods and services',
-        'T_5100': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5110': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5111': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5112': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5113': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5120': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5121': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5122': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5123': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5124': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5125': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5126': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5127': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5128': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5130': 'Taxes on production, sale, transfer, leasing and delivery of goods and rendering of services',
-        'T_5200': 'Taxes on use of goods and on permission to use goods or perform activities',
-        'T_5210': 'Taxes on use of goods and on permission to use goods or perform activities',
-        'T_5211': 'Taxes on use of goods and on permission to use goods or perform activities',
-        'T_5212': 'Taxes on use of goods and on permission to use goods or perform activities',
-        'T_5213': 'Taxes on use of goods and on permission to use goods or perform activities',
-        'T_5220': 'Taxes on use of goods and on permission to use goods or perform activities',
-        'T_5300': 'Taxes on extraction, production or use of natural resources',
-        'T_6000': 'Other taxes',
-        'T_6100': 'Other taxes',
-        'T_6200': 'Other taxes',
-        'T_CUS': 'Customs and import duties'
-    }
-    
-    # Unit measure mappings (UNIT_MEASURE)
-    unit_mappings = {
-        'PT_B1GQ': 'Percentage of GDP',
-        'PT_OTR_SECTOR': 'Percentage of other sector',
-        'USD': 'US Dollars',
-        'XDC': 'National currency',
-        'IX': 'Index',
-        'USD_EXC': 'US Dollars (exchange rate)'
-    }
-    
-    # Frequency mappings (FREQ)
-    freq_mappings = {
-        'A': 'Annual',
-        'Q': 'Quarterly',
-        'M': 'Monthly'
-    }
-    
-    # Sector mappings (SECTOR)
-    sector_mappings = {
-        'S1': 'Total economy',
-        'S13': 'General government',
-        'S1311': 'Central government',
-        'S1312': 'State government',
-        'S1313': 'Local government',
-        'S1314': 'Social security funds',
-        'S1315': 'General government (excluding social security)'
-    }
-    
-    # Measure mappings (MEASURE)
+    # MEASURE mappings - only the codes actually used in the data
     measure_mappings = {
         'TAX_REV': 'Tax revenue',
-        'B1G': 'Gross domestic product',
-        'B1GQ': 'Gross domestic product',
-        'LF': 'Labour force',
-        'LI': 'Labour input'
+        'LF': 'Labour force'
     }
     
-    # Transaction mappings (TRANSACTION)
-    transaction_mappings = {
-        'B1G': 'Gross domestic product',
-        'B1GQ': 'Gross domestic product',
-        'B1GXP119': 'Gross domestic product',
-        'D21': 'Taxes on products',
-        'D21X31': 'Taxes on products',
-        'D31': 'Compensation of employees',
-        'YA1': 'Gross value added'
+    # COUNTERPART_SECTOR mappings - only the codes actually used in the data
+    counterpart_sector_mappings = {
+        'S1': 'Total economy'
     }
     
-    # Activity mappings (ACTIVITY)
+    # ACTIVITY mappings - only the codes actually used in the data
     activity_mappings = {
-        '_T': 'Total',
         '_Z': 'Not applicable',
+        '_T': 'Total',
         'A': 'Agriculture, forestry and fishing',
         'BTE': 'Business services',
         'C': 'Manufacturing',
@@ -235,35 +180,22 @@ def get_comprehensive_label_mappings():
         'RTU': 'Real estate, transport and utilities'
     }
     
-    # Price base mappings (PRICE_BASE)
+    # EXPENDITURE mappings - only the codes actually used in the data
+    expenditure_mappings = {
+        '_Z': 'Not applicable'
+    }
+    
+    # PRICE_BASE mappings - only the codes actually used in the data
     price_mappings = {
-        'DR': 'Deflator',
-        'L': 'Laspeyres',
-        'LR': 'Laspeyres',
-        'V': 'Current prices',
-        'VQ': 'Current prices',
-        'Y': 'Previous year prices'
+        'L': 'Laspeyres'
     }
     
-    # Common OECD codes that appear across datasets
-    common_mappings = {
-        'S1': 'Total economy',
-        '_Z': 'Not applicable',
-        '_T': 'Total',
-        '_X': 'Unspecified'
-    }
-    
-    mappings['REF_AREA'] = country_mappings
-    mappings['STANDARD_REVENUE'] = tax_mappings
-    mappings['UNIT_MEASURE'] = unit_mappings
-    mappings['FREQ'] = freq_mappings
-    mappings['SECTOR'] = sector_mappings
+    # Only include mappings that are actually needed
     mappings['MEASURE'] = measure_mappings
-    mappings['TRANSACTION'] = transaction_mappings
+    mappings['COUNTERPART_SECTOR'] = counterpart_sector_mappings
     mappings['ACTIVITY'] = activity_mappings
+    mappings['EXPENDITURE'] = expenditure_mappings
     mappings['PRICE_BASE'] = price_mappings
-    mappings['COUNTERPART_SECTOR'] = common_mappings
-    mappings['EXPENDITURE'] = common_mappings
     
     return mappings
 
@@ -335,25 +267,22 @@ def process_csv_file(input_file, output_file, dataset_mappings, fallback_mapping
         print(f"  Error processing {input_file}: {e}")
         return False
 
-def main():
-    """Main function to process all CSV files"""
+def apply_labels_to_csv_files(dataset_mappings):
+    """Apply label mappings to all CSV files"""
+    print("\n" + "=" * 60)
+    print("Step 2: Applying Official OECD Labels to CSV Files")
     print("=" * 60)
-    print("Applying Official OECD Labels to CSV Files")
-    print("=" * 60)
-    
-    # Load official OECD mappings
-    dataset_mappings = load_official_oecd_mappings()
     
     # Load fallback mappings
     fallback_mappings = get_comprehensive_label_mappings()
     
-    # Define the data directory
-    data_dir = Path("data")
+    # Define the data directory (now looking in data/raw for input files)
+    data_dir = Path("data/raw")
     if not data_dir.exists():
         print(f"Error: Data directory {data_dir} does not exist")
         return
     
-    # Find all CSV files in the data directory
+    # Find all CSV files in the data/raw directory
     csv_files = list(data_dir.glob("*.csv"))
     print(f"\nFound {len(csv_files)} CSV files to process:")
     for file in csv_files:
@@ -369,8 +298,8 @@ def main():
             print(f"Skipping already labeled file: {csv_file.name}")
             continue
             
-        # Create output filename
-        output_file = csv_file.parent / f"{csv_file.stem}_labeled.csv"
+        # Create output filename in the data/processed directory
+        output_file = Path("data/processed") / f"{csv_file.stem}_labeled.csv"
         
         # Process the file
         if process_csv_file(csv_file, output_file, dataset_mappings, fallback_mappings):
@@ -389,9 +318,39 @@ def main():
     
     # List all generated files
     print("\nGenerated labeled files:")
-    for file in data_dir.glob("*_labeled.csv"):
+    for file in Path("data/processed").glob("*_labeled.csv"):
         size = file.stat().st_size
         print(f"  {file.name} ({size:,} bytes)")
+
+def main():
+    """Main function to perform complete labeling process"""
+    print("=" * 80)
+    print("OECD Data Labeling Pipeline - Complete Process")
+    print("=" * 80)
+    
+    # Step 1: Load structure files and extract codelists
+    dataset_mappings = load_and_extract_all_mappings()
+    
+    if dataset_mappings is None:
+        print("\nError: Could not load structure files.")
+        print("Please run fetch_data.py first to download the required structure files.")
+        return
+    
+    # Step 2: Apply labels to CSV files
+    apply_labels_to_csv_files(dataset_mappings)
+    
+    # Final summary
+    print("\n" + "=" * 80)
+    print("Complete Labeling Process Finished!")
+    print("=" * 80)
+    print("\nFiles generated:")
+    print("- Mapping JSON files in data/processed/")
+    print("- Labeled CSV files in data/processed/")
+    print("\nNext steps:")
+    print("1. Review the labeled CSV files")
+    print("2. Use the labeled data for analysis")
+    print("3. Check the mapping files for any missing codes")
+    print("=" * 80)
 
 if __name__ == "__main__":
     main() 

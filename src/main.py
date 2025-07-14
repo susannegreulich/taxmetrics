@@ -150,27 +150,31 @@ def main():
     # Generate visualizations
     print("\n10. Generating visualizations...")
     
+    # Create visualizations directory
+    import os
+    os.makedirs("data/visualizations", exist_ok=True)
+    
     # Tax burden comparison
     tax_burden_fig = charts.plot_tax_burden_comparison(policies)
-    tax_burden_fig.write_html("data/tax_burden_comparison.html")
+    tax_burden_fig.write_html("data/visualizations/tax_burden_comparison.html")
     
     # Revenue comparison
     revenue_fig = charts.plot_revenue_comparison(revenue_comparison)
-    revenue_fig.write_html("data/revenue_comparison.html")
+    revenue_fig.write_html("data/visualizations/revenue_comparison.html")
     
     # Tax burden by income groups
     tax_burden_groups_fig = charts.plot_tax_burden_by_income_groups(comparison_results['tax_burden_analysis'])
-    tax_burden_groups_fig.write_html("data/tax_burden_by_income_groups.html")
+    tax_burden_groups_fig.write_html("data/visualizations/tax_burden_by_income_groups.html")
     
     # Progressivity comparison
     progressivity_fig = charts.plot_progressivity_comparison(comparison_results['progressivity_analysis'])
-    progressivity_fig.write_html("data/progressivity_comparison.html")
+    progressivity_fig.write_html("data/visualizations/progressivity_comparison.html")
     
     # Comprehensive dashboard
     dashboard_fig = charts.create_comprehensive_dashboard(comparison_results)
-    dashboard_fig.write_html("data/comprehensive_dashboard.html")
+    dashboard_fig.write_html("data/visualizations/comprehensive_dashboard.html")
     
-    print("   Visualizations saved to data/ directory")
+    print("   Visualizations saved to data/visualizations/ directory")
     
     # Perform sensitivity analysis
     print("\n11. Sensitivity Analysis:")
@@ -188,9 +192,9 @@ def main():
     
     # Save sensitivity plot
     sensitivity_fig = charts.plot_sensitivity_analysis(sensitivity_results)
-    sensitivity_fig.write_html("data/sensitivity_analysis.html")
+    sensitivity_fig.write_html("data/visualizations/sensitivity_analysis.html")
     
-    print("\nAnalysis complete! Check the data/ directory for interactive visualizations.")
+    print("\nAnalysis complete! Check the data/visualizations/ directory for interactive visualizations.")
     print("\nKey Findings:")
     print("- Progressive tax provides high progressivity with moderate revenue")
     print("- Flat tax generates moderate revenue with moderate progressivity")

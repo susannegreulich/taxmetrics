@@ -792,7 +792,7 @@ class OECDDataCollector:
         logger.info(f"Retrieved {len(df)} tax administration records")
         return df
     
-    def save_data(self, data: Dict[str, pd.DataFrame], output_dir: str = "data/oecd"):
+    def save_data(self, data: Dict[str, pd.DataFrame], output_dir: str = "data/processed"):
         """
         Save collected data to files.
         
