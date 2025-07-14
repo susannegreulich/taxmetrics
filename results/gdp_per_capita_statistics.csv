@@ -1,0 +1,9 @@
+Metric,Value
+total_records,1724
+time_period_range,1990 - 2023
+number_of_countries,56
+gdp_per_capita_min,0.9837179729386968
+gdp_per_capita_max,142.90612061769295
+gdp_per_capita_mean,28.610581851270396
+gdp_per_capita_median,24.69810709248923
+gdp_per_capita_std,20.847975856325185
