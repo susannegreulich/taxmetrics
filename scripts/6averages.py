@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script to compute country averages over time for GDP per capita growth rates and tax rates.
-This script reads CSV files from the results/year_country directory and calculates
+This script reads CSV files from the results/over_time directory and calculates
 the average values for each country across all available time periods.
 """
 
@@ -57,10 +57,11 @@ def main():
     """Main function to compute and display country averages."""
     
     # Define the base directory
-    base_dir = Path("results/year_country")
+    base_dir = Path("results/over_time")
     
     # Define the files to process
     files_to_process = {
+        "GDP per capita": "gdp_per_capita.csv",
         "GDP per capita growth rates": "gdp_per_capita_growth_rates.csv",
         "Total tax revenue": "Total_tax_revenue.csv",
         "Taxes on goods and services": "Taxes_on_goods_and_services.csv",
@@ -70,7 +71,7 @@ def main():
     }
     
     # Create output directory
-    output_dir = Path("results/country_averages")
+    output_dir = Path("results/averages")
     output_dir.mkdir(exist_ok=True)
     
     # Dictionary to store all results
@@ -124,10 +125,10 @@ def main():
         print("\nSummary statistics for all metrics:")
         print(summary_df.describe())
         
-        # Save combined results
+        # Save combined results to a single CSV file
         summary_file = output_dir / "all_metrics_country_averages.csv"
         summary_df.to_csv(summary_file)
-        print(f"\nCombined results saved to: {summary_file}")
+        print(f"\nAll averages saved to: {summary_file}")
         
         # Display top 10 countries for each metric
         print("\nTop 10 countries for each metric:")

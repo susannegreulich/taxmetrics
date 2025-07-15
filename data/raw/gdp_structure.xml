@@ -2,9 +2,9 @@
 <!--NSI Web Service v8.19.7.0-->
 <message:Structure xmlns:message="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message" xmlns:structure="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/structure" xmlns:common="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common">
   <message:Header>
-    <message:ID>IDREF8083</message:ID>
+    <message:ID>IDREF11555</message:ID>
     <message:Test>false</message:Test>
-    <message:Prepared>2025-07-14T13:15:01.8282211+02:00</message:Prepared>
+    <message:Prepared>2025-07-15T15:35:14.1987143+02:00</message:Prepared>
     <message:Sender id="Unknown" />
     <message:Receiver id="Unknown" />
   </message:Header>
@@ -80624,7 +80624,7 @@ F52=F52A+F52B</common:Description>
       </structure:DataStructure>
     </structure:DataStructures>
     <structure:Constraints>
-      <structure:ContentConstraint id="CR_A_DSD_NAMAIN10@DF_TABLE1" agencyID="OECD.SDD.NAD" version="2.0" validFrom="2025-07-14T01:59:58.577Z" isFinal="false" type="Actual">
+      <structure:ContentConstraint id="CR_A_DSD_NAMAIN10@DF_TABLE1" agencyID="OECD.SDD.NAD" version="2.0" validFrom="2025-07-15T01:45:56.013Z" isFinal="false" type="Actual">
         <common:Annotations>
           <common:Annotation>
             <common:AnnotationTitle>A</common:AnnotationTitle>

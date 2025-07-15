@@ -13,7 +13,7 @@ from pathlib import Path
 def get_descriptive_stats():
     """Generate descriptive statistics for all CSV files across all countries and years."""
     
-    data_folder = Path("results/year_country")
+    data_folder = Path("results/over_time")
     
     # Define the specific CSV files to analyze (excluding output files)
     target_files = [
@@ -26,9 +26,21 @@ def get_descriptive_stats():
         "Social_security_contributions_SSC.csv"
     ]
     
+    # Define units for each dataset
+    units_mapping = {
+        "gdp_per_capita.csv": "PPP-adjusted USD",
+        "gdp_per_capita_growth_rates.csv": "%",
+        "Total_tax_revenue.csv": "%",
+        "Taxes_on_income_profits_and_capital_gains_of_individuals_and_corporations.csv": "%",
+        "Taxes_on_goods_and_services.csv": "%",
+        "Taxes_on_property.csv": "%",
+        "Social_security_contributions_SSC.csv": "%"
+    }
+    
     csv_files = [f for f in data_folder.glob("*.csv") if f.name in target_files]
     
     descriptive_stats = {}
+    units_data = {}
     
     for csv_file in csv_files:
         df = pd.read_csv(csv_file)
@@ -53,20 +65,33 @@ def get_descriptive_stats():
         # Store statistics with dataset name as key
         dataset_name = csv_file.stem.replace('_', ' ').title()
         descriptive_stats[dataset_name] = stats
+        
+        # Store units for this dataset
+        units_data[dataset_name] = units_mapping[csv_file.name]
     
-    return descriptive_stats
+    return descriptive_stats, units_data
 
 def save_descriptive_stats():
     """Save descriptive statistics for all CSV files to a separate file."""
     
-    descriptive_stats = get_descriptive_stats()
-    data_folder = Path("results/year_country")
+    descriptive_stats, units_data = get_descriptive_stats()
+    data_folder = Path("results/over_time")
     
     # Create a DataFrame with datasets as rows and statistics as columns
     stats_df = pd.DataFrame(descriptive_stats).T
     
     # Sort rows alphabetically by dataset name
     stats_df = stats_df.sort_index()
+    
+    # Create units Series and align with stats_df
+    units_series = pd.Series(units_data)
+    units_series = units_series.reindex(stats_df.index)  # Align with sorted stats_df
+    
+    # Add units as a new column after the index
+    stats_df.insert(0, 'Units', units_series)
+    
+    # Set index name to 'Dataset' so the first column is labeled
+    stats_df.index.name = 'Dataset'
     
     # Save the results
     output_file = data_folder / "descriptive_stats.csv"
@@ -75,10 +100,10 @@ def save_descriptive_stats():
     return output_file
 
 def analyze_missing_values():
-    """Analyze missing values across CSV files in the year_country folder."""
+    """Analyze missing values across CSV files in the over_time folder."""
     
-    # Path to the year_country folder
-    data_folder = Path("results/year_country")
+    # Path to the over_time folder
+    data_folder = Path("results/over_time")
     
     # Define the specific CSV files to analyze for missing values
     target_files = [

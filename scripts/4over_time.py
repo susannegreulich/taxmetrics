@@ -7,7 +7,7 @@ This script processes the labeled data which is already in 2D format:
 2. Tax rate types - Separates different tax types from the tax revenues data
 3. GDP per capita growth rates - Computes year-over-year growth rates
 
-All output files are stored in results/year_country/ directory structure.
+All output files are stored in results/over_time/ directory structure.
 """
 
 import pandas as pd
@@ -24,7 +24,7 @@ def separate_tax_types():
     
     # Read the labeled tax revenues data
     input_file = "data/labeled/tax_revenues_labeled.csv"
-    output_dir = "results/year_country"
+    output_dir = "results/over_time"
     
     print(f"Reading data from {input_file}...")
     df = pd.read_csv(input_file)
@@ -107,7 +107,7 @@ def compute_gdp_per_capita():
     
     # Define file paths
     data_dir = Path("data/labeled")
-    results_dir = Path("results/year_country")
+    results_dir = Path("results/over_time")
     gdp_file = data_dir / "gdp_labeled.csv"
     population_file = data_dir / "population_labeled.csv"
     output_file = results_dir / "gdp_per_capita.csv"
@@ -202,7 +202,7 @@ def compute_gdp_per_capita_growth_rates():
     print("="*60)
     
     # Define file paths
-    results_dir = Path("results/year_country")
+    results_dir = Path("results/over_time")
     input_file = results_dir / "gdp_per_capita.csv"
     output_file = results_dir / "gdp_per_capita_growth_rates.csv"
     
@@ -276,7 +276,7 @@ def create_all_2d_tables():
     print("1. Tax rate 2D CSV files (one for each tax type)")
     print("2. GDP per capita 2D CSV file")
     print("3. GDP per capita growth rates 2D CSV file")
-    print("All files will be stored in results/year_country/ directory structure")
+    print("All files will be stored in results/over_time/ directory structure")
     
     try:
         # Step 1: Separate tax rate types
@@ -292,9 +292,9 @@ def create_all_2d_tables():
         print("ALL 2D TABLES CREATED SUCCESSFULLY!")
         print("="*60)
         print("\nSummary of created files:")
-        print("1. Tax rate files: results/year_country/")
-        print("2. GDP per capita: results/year_country/gdp_per_capita.csv")
-        print("3. GDP per capita growth rates: results/year_country/gdp_per_capita_growth_rates.csv")
+        print("1. Tax rate files: results/over_time/")
+        print("2. GDP per capita: results/over_time/gdp_per_capita.csv")
+        print("3. GDP per capita growth rates: results/over_time/gdp_per_capita_growth_rates.csv")
         
         return True
         

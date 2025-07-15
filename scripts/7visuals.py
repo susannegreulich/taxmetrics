@@ -137,10 +137,10 @@ def create_interactive_graph(csv_file, output_dir, title_prefix="", y_axis_title
 
 def create_all_interactive_graphs():
     """
-    Create interactive HTML graphs for all 2D CSV files in the results/year_country directory.
+    Create interactive HTML graphs for all 2D CSV files in the results/over_time directory.
     """
     results_dir = Path("results")
-    year_country_dir = results_dir / "year_country"
+    year_country_dir = results_dir / "over_time"
     
     # Ensure results directory exists
     results_dir.mkdir(exist_ok=True)
@@ -226,9 +226,9 @@ def create_summary_dashboard():
     Create a summary dashboard that shows key statistics for all datasets.
     """
     results_dir = Path("results")
-    year_country_dir = results_dir / "year_country"
+    year_country_dir = results_dir / "over_time"
     
-    # Read datasets from year_country directory (only time series files)
+    # Read datasets from over_time directory (only time series files)
     datasets = {}
     
     if year_country_dir.exists():
@@ -306,7 +306,7 @@ def create_summary_dashboard():
 
 if __name__ == "__main__":
     try:
-        print("Creating interactive HTML graphs for all CSV files in results/year_country...")
+        print("Creating interactive HTML graphs for all CSV files in results/over_time...")
         created_files = create_all_interactive_graphs()
         
         print("\nCreating summary dashboard...")
