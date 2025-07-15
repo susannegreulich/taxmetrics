@@ -1,11 +1,17 @@
 # Todos: 
 
-change to data/labeled. 
-processed is for unique values, removing redundant countries etc. 
 
-2. find common countries in the 3 datasets, and delete data for countries not in all 3 datasets
-3. summary descriptive stats. 
+CHECK THE DATA, UNITS ETC. why is gdp per capita so LOW? 20 dollars per year? or is the . mean thousands, ie 20k?
+
 4. make the plots. 
+
+analysis. 
+
+calculate gdp growth rate
+i have tax rate as percentage of gdp
+i have absolute gdp
+i have population
+
 
 data:
 
@@ -19,8 +25,7 @@ tax data query: https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP
 tax structure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.CTP.TPS/DSD_REV_COMP_GLOBAL@DF_RSGLOBAL/2.1?references=all
 
 # GDP link: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1/2.0?references=all
-GDP data query: https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1..B1GQ._Z._Z._Z.USD_PPP.V.N.T0102?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
-GDPstructure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1/2.0?references=all
+Configs: in current rpices. 
 
 
 population: https://data-explorer.oecd.org/vis?tm=population&pg=0&hc[Transaction]=&snb=305&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE3&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A..S1.S1.POP.._Z..PS...&pd=1990%2C2023&to[TIME_PERIOD]=false

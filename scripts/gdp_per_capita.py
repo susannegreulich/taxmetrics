@@ -13,15 +13,19 @@ def compute_gdp_per_capita():
     """
     # Define file paths
     data_dir = Path("data/labeled")
+    results_dir = Path("results")
     gdp_file = data_dir / "gdp_labeled.csv"
     population_file = data_dir / "population_labeled.csv"
-    output_file = data_dir / "gdp_per_capita.csv"
+    output_file = results_dir / "gdp_per_capita.csv"
     
     # Check if files exist
     if not gdp_file.exists():
         raise FileNotFoundError(f"GDP file not found: {gdp_file}")
     if not population_file.exists():
         raise FileNotFoundError(f"Population file not found: {population_file}")
+    
+    # Ensure results directory exists
+    results_dir.mkdir(exist_ok=True)
     
     # Read the datasets
     print("Reading GDP data...")
@@ -58,22 +62,33 @@ def compute_gdp_per_capita():
     # Sort by time period and country for better readability
     result_df = result_df.sort_values(['TIME_PERIOD', 'REF_AREA'])
     
+    # Pivot the data to create a 2D format with years as rows and countries as columns
+    print("Creating 2D format with years as rows and countries as columns...")
+    pivot_df = result_df.pivot(index='TIME_PERIOD', columns='REF_AREA', values='value')
+    
+    # Reset index to make TIME_PERIOD a regular column
+    pivot_df = pivot_df.reset_index()
+    
     # Save the result
     print(f"Saving GDP per capita data to {output_file}...")
-    result_df.to_csv(output_file, index=False)
-    
+    pivot_df.to_csv(output_file, index=False)
+
+    # Remove Plotly interactive graph generation
+    # (Code block removed)
+
     # Print summary statistics
     print("\nSummary of GDP per capita computation:")
     print(f"Total records: {len(result_df)}")
     print(f"Time period range: {result_df['TIME_PERIOD'].min()} - {result_df['TIME_PERIOD'].max()}")
     print(f"Number of countries: {result_df['REF_AREA'].nunique()}")
     print(f"GDP per capita range: {result_df['value'].min():.2f} - {result_df['value'].max():.2f}")
+    print(f"2D format shape: {pivot_df.shape} (rows: time periods, columns: countries + 1)")
     
     # Show some sample data
-    print("\nSample GDP per capita data:")
-    print(result_df.head(10))
+    print("\nSample GDP per capita data (2D format):")
+    print(pivot_df.head(10))
     
-    return result_df
+    return pivot_df
 
 if __name__ == "__main__":
     try:
