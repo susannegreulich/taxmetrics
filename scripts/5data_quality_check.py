@@ -2,6 +2,8 @@
 """
 Script to analyze missing values across CSV datasets in the year_country folder.
 Creates a summary table with countries as rows and datasets as columns, showing missing value counts.
+The results show that only 32 countries have zero missing values. So the analysis would be
+more clean using ONLY these countries. For now I've chosen to use all data. 
 Also generates descriptive statistics for all CSV files across all countries and years.
 """
 

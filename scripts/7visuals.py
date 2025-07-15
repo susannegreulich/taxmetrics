@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
-Script to create interactive HTML graphs for all 2D CSV files in the results/year_country directory.
+Script to create interactive HTML graphs for all 2D CSV files in the results/over_time directory.
 Creates graphs with all countries in different colors by default, plus dropdown buttons
 to select individual countries.
+Also creates scatter plots for GDP per capita growth rates against each tax type.
+Uses country averages data to show the relationship between economic growth and tax structures.
 """
 
 import pandas as pd
@@ -12,6 +14,11 @@ import plotly.graph_objs as go
 import plotly.offline as pyo
 from plotly.subplots import make_subplots
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+warnings.filterwarnings('ignore')
+
 
 def is_time_series_csv(csv_file):
     """
@@ -140,21 +147,22 @@ def create_all_interactive_graphs():
     Create interactive HTML graphs for all 2D CSV files in the results/over_time directory.
     """
     results_dir = Path("results")
-    year_country_dir = results_dir / "over_time"
+    over_time_dir = results_dir / "over_time"
     
-    # Ensure results directory exists
+    # Ensure results and over_time directories exist
     results_dir.mkdir(exist_ok=True)
+    over_time_dir.mkdir(exist_ok=True)
     
-    # Check if year_country directory exists
-    if not year_country_dir.exists():
-        print(f"Warning: Directory {year_country_dir} does not exist")
+    # Check if over_time directory exists
+    if not over_time_dir.exists():
+        print(f"Warning: Directory {over_time_dir} does not exist")
         return []
     
-    # Get all CSV files in the year_country directory
-    csv_files = list(year_country_dir.glob("*.csv"))
+    # Get all CSV files in the over_time directory
+    csv_files = list(over_time_dir.glob("*.csv"))
     
     if not csv_files:
-        print(f"No CSV files found in {year_country_dir}")
+        print(f"No CSV files found in {over_time_dir}")
         return []
     
     # Filter for time series files only
@@ -163,7 +171,7 @@ def create_all_interactive_graphs():
     print(f"Found {len(csv_files)} CSV files, {len(time_series_files)} are time series files")
     
     if not time_series_files:
-        print(f"No time series CSV files found in {year_country_dir}")
+        print(f"No time series CSV files found in {over_time_dir}")
         return []
     
     # Create configurations for all time series CSV files
@@ -203,7 +211,7 @@ def create_all_interactive_graphs():
             # Create the interactive graph
             html_file = create_interactive_graph(
                 csv_file=csv_file,
-                output_dir=year_country_dir,
+                output_dir=over_time_dir,
                 title_prefix=config['title_prefix'],
                 y_axis_title=config['y_axis_title']
             )
@@ -221,100 +229,248 @@ def create_all_interactive_graphs():
     
     return created_files
 
-def create_summary_dashboard():
-    """
-    Create a summary dashboard that shows key statistics for all datasets.
-    """
-    results_dir = Path("results")
-    year_country_dir = results_dir / "over_time"
+
+
+def load_country_averages_data(file_path):
+    """Load the country averages data."""
+    df = pd.read_csv(file_path)
     
-    # Read datasets from over_time directory (only time series files)
-    datasets = {}
+    # Clean the data - remove rows with missing values
+    df = df.dropna()
     
-    if year_country_dir.exists():
-        csv_files = list(year_country_dir.glob("*.csv"))
-        time_series_files = [f for f in csv_files if is_time_series_csv(f)]
-        
-        for csv_file in time_series_files:
-            title = csv_file.stem.replace('_', ' ').title()
-            try:
-                df = pd.read_csv(csv_file)
-                df = df.set_index('TIME_PERIOD')
-                datasets[title] = df
-            except Exception as e:
-                print(f"Error reading {csv_file}: {e}")
+    # Also remove any rows where any tax column is 0 or negative (except for specific cases like SSC which can be 0)
+    tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates']]
+    for col in tax_columns:
+        if col != 'Social security contributions (SSC)':  # SSC can legitimately be 0
+            df = df[df[col] > 0]
     
-    # Create summary statistics
-    summary_data = []
-    for dataset_name, df in datasets.items():
-        countries = list(df.columns)
-        years = list(df.index)
-        
-        # Calculate statistics
-        all_values = df.values.flatten()
-        valid_values = all_values[~np.isnan(all_values)]
-        
-        if len(valid_values) > 0:
-            summary_data.append({
-                'Dataset': dataset_name,
-                'Countries': len(countries),
-                'Years': len(years),
-                'Min Value': f"{valid_values.min():.2f}",
-                'Max Value': f"{valid_values.max():.2f}",
-                'Mean Value': f"{valid_values.mean():.2f}",
-                'Std Dev': f"{valid_values.std():.2f}"
-            })
+    return df
+
+def create_tax_growth_scatter_plots(df, output_dir):
+    """Create scatter plots for GDP growth rates against each tax type."""
     
-    # Create summary table
-    if summary_data:
-        summary_df = pd.DataFrame(summary_data)
-        # Sort by Dataset column alphabetically
-        summary_df = summary_df.sort_values('Dataset')
-        summary_file = year_country_dir / "dataset_summary.csv"
-        summary_df.to_csv(summary_file, index=False)
-        print(f"Created dataset summary: {summary_file}")
+    # Set up the plotting style
+    plt.style.use('default')
+    sns.set_palette("husl")
+    
+    # Define tax columns (excluding GDP growth rates and Country)
+    tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates']]
+    
+    # Create a figure with subplots
+    n_cols = 2
+    n_rows = (len(tax_columns) + 1) // 2
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5 * n_rows))
+    fig.suptitle('GDP Per Capita Growth Rates vs Tax Types (Country Averages)', 
+                 fontsize=16, fontweight='bold', y=0.98)
+    
+    # Flatten axes for easier iteration
+    if n_rows == 1:
+        axes = axes.reshape(1, -1)
+    axes = axes.flatten()
+    
+    for idx, tax_col in enumerate(tax_columns):
+        ax = axes[idx]
         
-        # Create HTML table
-        html_table = summary_df.to_html(index=False, classes='table table-striped')
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Dataset Summary</title>
-            <style>
-                body {{ font-family: Arial, sans-serif; margin: 20px; }}
-                .table {{ border-collapse: collapse; width: 100%; }}
-                .table th, .table td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
-                .table th {{ background-color: #f2f2f2; }}
-                .table tr:nth-child(even) {{ background-color: #f9f9f9; }}
-                h1 {{ color: #333; }}
-            </style>
-        </head>
-        <body>
-            <h1>Dataset Summary</h1>
-            {html_table}
-        </body>
-        </html>
-        """
+        # Create scatter plot
+        scatter = ax.scatter(df[tax_col], df['GDP per capita growth rates'], 
+                           alpha=0.7, s=60, edgecolors='black', linewidth=0.5)
         
-        summary_html_file = year_country_dir / "dataset_summary.html"
-        with open(summary_html_file, 'w') as f:
-            f.write(html_content)
-        print(f"Created dataset summary HTML: {summary_html_file}")
-    else:
-        print("No time series datasets found for summary dashboard")
+        # Add country labels for points
+        for i, country in enumerate(df['Country']):
+            ax.annotate(country, (df[tax_col].iloc[i], df['GDP per capita growth rates'].iloc[i]),
+                       xytext=(5, 5), textcoords='offset points', fontsize=8, alpha=0.8)
+        
+        # Calculate correlation coefficient
+        correlation = df[tax_col].corr(df['GDP per capita growth rates'])
+        
+        # Add trend line (with error handling)
+        try:
+            z = np.polyfit(df[tax_col], df['GDP per capita growth rates'], 1)
+            p = np.poly1d(z)
+            ax.plot(df[tax_col], p(df[tax_col]), "r--", alpha=0.8, linewidth=2)
+        except (np.linalg.LinAlgError, ValueError) as e:
+            print(f"Warning: Could not fit trend line for {tax_col}: {e}")
+            correlation = np.nan
+        
+        # Customize the plot
+        ax.set_xlabel(f'{tax_col} (% of GDP)', fontsize=12, fontweight='bold')
+        ax.set_ylabel('GDP Per Capita Growth Rate (%)', fontsize=12, fontweight='bold')
+        if not np.isnan(correlation):
+            ax.set_title(f'{tax_col}\nCorrelation: {correlation:.3f}', 
+                        fontsize=11, fontweight='bold')
+        else:
+            ax.set_title(f'{tax_col}\nCorrelation: N/A', 
+                        fontsize=11, fontweight='bold')
+        ax.grid(True, alpha=0.3)
+        
+        # Add correlation text
+        if not np.isnan(correlation):
+            ax.text(0.05, 0.95, f'r = {correlation:.3f}', transform=ax.transAxes, 
+                   bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8),
+                   fontsize=10, fontweight='bold')
+        else:
+            ax.text(0.05, 0.95, 'r = N/A', transform=ax.transAxes, 
+                   bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8),
+                   fontsize=10, fontweight='bold')
+    
+    # Hide empty subplots if any
+    for idx in range(len(tax_columns), len(axes)):
+        axes[idx].set_visible(False)
+    
+    # Adjust layout
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.95)
+    
+    # Save the plot
+    output_path = output_dir / 'tax_growth_scatter_plots.png'
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    print(f"Scatter plots saved to: {output_path}")
+    
+    # Show the plot
+    plt.show()
+    
+    return output_path
+
+def create_individual_tax_plots(df, output_dir):
+    """Create individual scatter plots for each tax type."""
+    
+    # Use the main output directory directly (no subfolder)
+    individual_dir = output_dir
+    
+    # Define tax columns
+    tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates']]
+    
+    for tax_col in tax_columns:
+        # Create figure
+        fig, ax = plt.subplots(figsize=(12, 8))
+        
+        # Create scatter plot
+        scatter = ax.scatter(df[tax_col], df['GDP per capita growth rates'], 
+                           alpha=0.7, s=80, edgecolors='black', linewidth=0.5, c='steelblue')
+        
+        # Add country labels
+        for i, country in enumerate(df['Country']):
+            ax.annotate(country, (df[tax_col].iloc[i], df['GDP per capita growth rates'].iloc[i]),
+                       xytext=(5, 5), textcoords='offset points', fontsize=9, alpha=0.8)
+        
+        # Calculate correlation
+        correlation = df[tax_col].corr(df['GDP per capita growth rates'])
+        
+        # Add trend line (with error handling)
+        try:
+            z = np.polyfit(df[tax_col], df['GDP per capita growth rates'], 1)
+            p = np.poly1d(z)
+            ax.plot(df[tax_col], p(df[tax_col]), "r--", alpha=0.8, linewidth=2, label=f'Trend line')
+        except (np.linalg.LinAlgError, ValueError) as e:
+            print(f"Warning: Could not fit trend line for {tax_col}: {e}")
+            correlation = np.nan
+        
+        # Customize plot
+        ax.set_xlabel(f'{tax_col} (% of GDP)', fontsize=14, fontweight='bold')
+        ax.set_ylabel('GDP Per Capita Growth Rate (%)', fontsize=14, fontweight='bold')
+        if not np.isnan(correlation):
+            ax.set_title(f'GDP Growth vs {tax_col}\nCorrelation: {correlation:.3f}', 
+                        fontsize=16, fontweight='bold')
+        else:
+            ax.set_title(f'GDP Growth vs {tax_col}\nCorrelation: N/A', 
+                        fontsize=16, fontweight='bold')
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+        
+        # Add correlation info
+        if not np.isnan(correlation):
+            ax.text(0.05, 0.95, f'Correlation coefficient: {correlation:.3f}', 
+                   transform=ax.transAxes, bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.9),
+                   fontsize=12, fontweight='bold')
+        else:
+            ax.text(0.05, 0.95, 'Correlation coefficient: N/A', 
+                   transform=ax.transAxes, bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.9),
+                   fontsize=12, fontweight='bold')
+        
+        # Save individual plot
+        safe_filename = tax_col.replace(' ', '_').replace(',', '').replace('(', '').replace(')', '')
+        output_path = individual_dir / f'{safe_filename}_vs_gdp_growth.png'
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        print(f"Individual plot saved: {output_path}")
+    
+    return individual_dir
+
+def generate_tax_correlation_summary(df):
+    """Generate summary statistics for correlations."""
+    tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates']]
+    
+    correlations = {}
+    for tax_col in tax_columns:
+        correlation = df[tax_col].corr(df['GDP per capita growth rates'])
+        correlations[tax_col] = correlation
+    
+    # Create summary DataFrame
+    summary_df = pd.DataFrame(list(correlations.items()), columns=['Tax Type', 'Correlation with GDP Growth'])
+    summary_df = summary_df.sort_values('Correlation with GDP Growth', ascending=False)
+    
+    return summary_df
+
+def create_tax_growth_analysis():
+    """Create scatter plots for GDP per capita growth rates against each tax type."""
+    
+    # Define paths
+    data_file = Path('results/averages/all_metrics_country_averages.csv')
+    output_dir = Path('results/averages')
+    
+    # Ensure averages directory exists
+    output_dir.mkdir(exist_ok=True)
+    
+    # Check if the data file exists
+    if not data_file.exists():
+        print(f"Warning: Country averages data file not found: {data_file}")
+        print("Skipping tax-growth scatter plot analysis.")
+        return
+    
+    print("Loading country averages data...")
+    df = load_country_averages_data(data_file)
+    
+    print(f"Loaded data for {len(df)} countries")
+    print(f"Tax types available: {[col for col in df.columns if col not in ['Country', 'GDP per capita growth rates']]}")
+    
+    # Create combined scatter plots
+    print("\nCreating combined scatter plots...")
+    create_tax_growth_scatter_plots(df, output_dir)
+    
+    # Create individual plots
+    print("\nCreating individual scatter plots...")
+    create_individual_tax_plots(df, output_dir)
+    
+    # Generate summary statistics
+    print("\nGenerating summary statistics...")
+    summary_df = generate_tax_correlation_summary(df)
+    
+    # Save summary statistics
+    summary_path = output_dir / 'correlation_summary.csv'
+    summary_df.to_csv(summary_path, index=False)
+    print(f"Correlation summary saved to: {summary_path}")
+    
+    # Print summary
+    print("\n" + "="*60)
+    print("CORRELATION SUMMARY")
+    print("="*60)
+    print(summary_df.to_string(index=False))
+    print("\n" + "="*60)
+    
+    print(f"\nTax-growth analysis complete! Results saved to: {output_dir}")
 
 if __name__ == "__main__":
     try:
         print("Creating interactive HTML graphs for all CSV files in results/over_time...")
         created_files = create_all_interactive_graphs()
         
-        print("\nCreating summary dashboard...")
-        create_summary_dashboard()
+        print("\nCreating tax-growth scatter plot analysis...")
+        create_tax_growth_analysis()
         
-        print("\nAll interactive graphs created successfully!")
-        print(f"Total files created: {len(created_files)}")
+        print("\nAll visualizations created successfully!")
+        print(f"Total interactive HTML files created: {len(created_files)}")
         
     except Exception as e:
-        print(f"Error creating interactive graphs: {e}")
+        print(f"Error creating visualizations: {e}")
         raise 

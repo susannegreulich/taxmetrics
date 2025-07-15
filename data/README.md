@@ -10,7 +10,7 @@ tax structure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.CTP.TPS/DSD
 
 unit: percentage of GDP
 
-# GDP link: 
+# GDP link: https://data-explorer.oecd.org/vis?tm=annual%20gdp%20developer&pg=0&hc[Table%20identifier]=&snb=157&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE1&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A..S1..B1GQ._Z._Z._Z.USD_PPP.V.N.T0102&pd=1990%2C2023&to[TIME_PERIOD]=false
 data "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1..B1GQ._Z._Z._Z.USD_PPP.V.N.T0102?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
 structure: 'https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1/2.0?references=all',
 Combined transaction: 
