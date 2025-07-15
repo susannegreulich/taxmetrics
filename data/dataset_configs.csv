@@ -1,0 +1,28 @@
+Dataset,Deleted_Column,Single_Unique_Value,Label
+Population,FREQ,A,Annual
+Population,SECTOR,S1,Total economy
+Population,COUNTERPART_SECTOR,S1,Total economy
+Population,TRANSACTION,POP,Total population
+Population,INSTR_ASSET,_Z,Not applicable
+Population,ACTIVITY,_Z,Not applicable
+Population,EXPENDITURE,_Z,Not applicable
+Population,UNIT_MEASURE,PS,Persons
+Population,PRICE_BASE,_Z,Not applicable
+Population,TRANSFORMATION,N,Non transformed data
+Population,TABLE_IDENTIFIER,T0110,Table 0110 - Population and employment
+GDP,FREQ,A,Annual
+GDP,SECTOR,S1,Total economy
+GDP,COUNTERPART_SECTOR,S1,Total economy
+GDP,TRANSACTION,B1GQ,Gross domestic product
+GDP,INSTR_ASSET,_Z,Not applicable
+GDP,ACTIVITY,_Z,Not applicable
+GDP,EXPENDITURE,_Z,Not applicable
+GDP,UNIT_MEASURE,USD_PPP,"US dollars, PPP converted"
+GDP,PRICE_BASE,V,Current prices
+GDP,TRANSFORMATION,N,Non transformed data
+GDP,TABLE_IDENTIFIER,T0102,Table 0102 - GDP identity from the expenditure side
+Tax Revenues,MEASURE,TAX_REV,Tax revenue
+Tax Revenues,SECTOR,S13,General government
+Tax Revenues,CTRY_SPECIFIC_REVENUE,_T,Total
+Tax Revenues,UNIT_MEASURE,PT_B1GQ,Percentage of GDP
+Tax Revenues,FREQ,A,Annual

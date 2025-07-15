@@ -2,56 +2,15 @@
 """
 Script to find common countries across all three datasets (population, GDP, tax revenues).
 Reads the raw CSV files directly to extract unique countries from each dataset and finds the intersection.
-Also filters the raw data files to keep only data for common countries.
-Removes columns with only one unique value and saves the single unique values to a markdown file. As these single
+Then filters the raw data files to keep only data for common countries.
+Also removes columns/variables with only one unique value and saves the single unique values to a CSV file. As these single
 unique values were not values of interest, but merely the configurations for the data chosen. 
-The unique values are replaced with their labels using the mapping files before saving to the markdown report.
+Finally, converts the filtered data to 2D format with years as rows and countries as columns.
 """
 
 import pandas as pd
 import os
-import json
 from pathlib import Path
-
-def load_mappings(dataset_name):
-    """
-    Load the mapping file for a given dataset.
-    
-    Args:
-        dataset_name (str): Name of the dataset (population, gdp, or tax_revenues)
-    
-    Returns:
-        dict: Dictionary containing the mappings for the dataset
-    """
-    mapping_file = Path(f"data/labeled/{dataset_name}_mappings.json")
-    
-    if not mapping_file.exists():
-        print(f"Warning: Mapping file not found: {mapping_file}")
-        return {}
-    
-    try:
-        with open(mapping_file, 'r', encoding='utf-8') as f:
-            mappings = json.load(f)
-        return mappings
-    except Exception as e:
-        print(f"Error loading mapping file {mapping_file}: {e}")
-        return {}
-
-def get_label_for_value(column_name, value, mappings):
-    """
-    Get the label for a given value in a specific column using the mappings.
-    
-    Args:
-        column_name (str): Name of the column
-        value: The value to look up
-        mappings (dict): Dictionary containing the mappings
-    
-    Returns:
-        str: The label for the value, or the original value if no mapping found
-    """
-    if column_name in mappings and str(value) in mappings[column_name]:
-        return mappings[column_name][str(value)]
-    return str(value)
 
 def find_common_countries():
     """
@@ -169,23 +128,22 @@ def remove_single_value_columns(common_countries):
     """
     Remove columns that have only one unique value across all datasets.
     Save the single unique values to a markdown file for reference.
-    Replace identifiers with their labels using the mapping files.
     
     Args:
         common_countries (list): List of country codes to keep
     """
     raw_dir = Path("data/raw")
     filtered_dir = Path("data/filtered")
-    summary_dir = Path("data/summary")
+    data_dir = Path("data")
     
-    # Create summary directory if it doesn't exist
-    summary_dir.mkdir(parents=True, exist_ok=True)
+    # Create data directory if it doesn't exist
+    data_dir.mkdir(parents=True, exist_ok=True)
     
     # Define the raw data files to process (to get original column structure)
     raw_files = [
-        ("population_raw.csv", "population_filtered.csv", "Population", "population"),
-        ("gdp_raw.csv", "gdp_filtered.csv", "GDP", "gdp"),
-        ("tax_revenues_raw.csv", "tax_revenues_filtered.csv", "Tax Revenues", "tax_revenues")
+        ("population_raw.csv", "population_filtered.csv", "Population"),
+        ("gdp_raw.csv", "gdp_filtered.csv", "GDP"),
+        ("tax_revenues_raw.csv", "tax_revenues_filtered.csv", "Tax Revenues")
     ]
     
     dataset_configs = {}
@@ -193,7 +151,7 @@ def remove_single_value_columns(common_countries):
     print("\nRemoving columns with single unique values...")
     print("=" * 50)
     
-    for raw_file, filtered_file, dataset_name, mapping_key in raw_files:
+    for raw_file, filtered_file, dataset_name in raw_files:
         raw_path = raw_dir / raw_file
         filtered_path = filtered_dir / filtered_file
         
@@ -208,9 +166,6 @@ def remove_single_value_columns(common_countries):
         try:
             print(f"Processing {raw_file}...")
             
-            # Load mappings for this dataset
-            mappings = load_mappings(mapping_key)
-            
             # Read the raw data to determine which columns have single values
             df_raw = pd.read_csv(raw_path)
             original_columns = list(df_raw.columns)
@@ -224,9 +179,7 @@ def remove_single_value_columns(common_countries):
                 unique_values = df_raw[column].dropna().unique()
                 if len(unique_values) == 1:
                     value = unique_values[0]
-                    # Get the label for this value using mappings
-                    label = get_label_for_value(column, value, mappings)
-                    single_value_columns[column] = label
+                    single_value_columns[column] = str(value)
                 else:
                     columns_to_keep.append(column)
             
@@ -258,69 +211,126 @@ def remove_single_value_columns(common_countries):
 
 def save_dataset_configs(dataset_configs):
     """
-    Save the dataset configurations to a markdown file.
+    Save the dataset configurations to a CSV file.
     
     Args:
         dataset_configs (dict): Dictionary containing configs for each dataset
     """
-    summary_dir = Path("data/summary")
-    config_file = summary_dir / "dataset_configs.md"
+    data_dir = Path("data")
+    config_file = data_dir / "dataset_configs.csv"
     
     print(f"\nSaving dataset configurations to: {config_file}")
     
-    with open(config_file, 'w', encoding='utf-8') as f:
-        f.write("# Dataset Configurations\n\n")
-        f.write("This file contains information about columns that were removed from each dataset because they had only one unique value.\n")
-        f.write("**Note:** The unique values shown below are the human-readable labels (not the original identifiers).\n\n")
-        
-        for dataset_name, config in dataset_configs.items():
-            f.write(f"## {dataset_name} Dataset\n\n")
-            
-            # Single value columns
-            if config['single_value_columns']:
-                f.write("### Removed Columns (Single Unique Value)\n\n")
-                
-                # Find the maximum length of column names and values for consistent formatting
-                max_column_length = max(len(str(col)) for col in config['single_value_columns'].keys())
-                max_value_length = max(len(str(val)) for val in config['single_value_columns'].values())
-                
-                # Ensure minimum widths for readability
-                max_column_length = max(max_column_length, 6)  # "Column" is 6 chars
-                max_value_length = max(max_value_length, 15)   # "Unique Value" is 15 chars
-                
-                # Create header
-                header = f"| {'Column':<{max_column_length}} | {'Unique Value (Label)':<{max_value_length}} |"
-                f.write(header + "\n")
-                
-                # Create separator
-                separator = f"|{'-' * (max_column_length + 2)}|{'-' * (max_value_length + 2)}|"
-                f.write(separator + "\n")
-                
-                # Create data rows
-                for column, value in config['single_value_columns'].items():
-                    row = f"| {str(column):<{max_column_length}} | {str(value):<{max_value_length}} |"
-                    f.write(row + "\n")
-                f.write("\n")
-            else:
-                f.write("**No columns were removed (all columns had multiple unique values).**\n\n")
-            
-            # Columns kept
-            f.write("### Columns Kept\n\n")
-            f.write(f"Total columns kept: {len(config['columns_kept'])}\n\n")
-            f.write("```\n")
-            for column in config['columns_kept']:
-                f.write(f"{column}\n")
-            f.write("```\n\n")
-            
-            # Summary
-            f.write("### Summary\n\n")
-            f.write(f"- Original columns: {len(config['original_columns'])}\n")
-            f.write(f"- Columns kept: {len(config['columns_kept'])}\n")
-            f.write(f"- Columns removed: {len(config['single_value_columns'])}\n\n")
-            
-            f.write("---\n\n")
+    # Prepare data for CSV
+    csv_data = []
+    for dataset_name, config in dataset_configs.items():
+        if config['single_value_columns']:
+            for column, value in config['single_value_columns'].items():
+                csv_data.append({
+                    'Dataset': dataset_name,
+                    'Deleted_Column': column,
+                    'Single_Unique_Value': value
+                })
+        else:
+            # Add a row to indicate no columns were deleted for this dataset
+            csv_data.append({
+                'Dataset': dataset_name,
+                'Deleted_Column': 'None',
+                'Single_Unique_Value': 'No columns deleted'
+            })
     
-    print(f"Dataset configurations saved to: {config_file}")
+    # Create DataFrame and save to CSV
+    if csv_data:
+        df_config = pd.DataFrame(csv_data)
+        df_config.to_csv(config_file, index=False)
+        print(f"Dataset configurations saved to: {config_file}")
+        print(f"Total rows: {len(df_config)}")
+    else:
+        print("No configuration data to save.")
+
+def convert_to_2d_format():
+    """
+    Convert filtered data from long format to 2D format with years as rows and countries as columns.
+    Creates new 2D versions of the filtered CSV files.
+    For tax revenues, creates a format with TIME_PERIOD, STANDARD_REVENUE, and all REF_AREAs as columns.
+    """
+    filtered_dir = Path("data/filtered")
+    
+    # Define the filtered data files to convert (save with original names)
+    filtered_files = [
+        ("population_filtered.csv", "population_filtered.csv"),
+        ("gdp_filtered.csv", "gdp_filtered.csv"),
+        ("tax_revenues_filtered.csv", "tax_revenues_filtered.csv")
+    ]
+    
+    print("\nConverting filtered data to 2D format...")
+    print("=" * 50)
+    
+    for filtered_file, output_file in filtered_files:
+        filtered_path = filtered_dir / filtered_file
+        output_path = filtered_dir / output_file
+        
+        if not filtered_path.exists():
+            print(f"Warning: Filtered file not found: {filtered_path}")
+            continue
+        
+        try:
+            print(f"Processing {filtered_file}...")
+            
+            # Read the filtered data
+            df = pd.read_csv(filtered_path)
+            
+            # Check if we have the expected columns
+            if 'TIME_PERIOD' not in df.columns or 'REF_AREA' not in df.columns or 'value' not in df.columns:
+                print(f"  Warning: Expected columns not found in {filtered_file}")
+                print(f"  Available columns: {list(df.columns)}")
+                continue
+            
+            # For tax revenues, create special format with TIME_PERIOD, STANDARD_REVENUE, and REF_AREAs as columns
+            if 'STANDARD_REVENUE' in df.columns:
+                # Pivot to get TIME_PERIOD and STANDARD_REVENUE as index, REF_AREA as columns
+                df_pivot = df.pivot_table(
+                    index=['TIME_PERIOD', 'STANDARD_REVENUE'],
+                    columns='REF_AREA',
+                    values='value',
+                    aggfunc='first'  # Take the first value if there are duplicates
+                )
+                
+                # Reset index to make TIME_PERIOD and STANDARD_REVENUE regular columns
+                df_pivot = df_pivot.reset_index()
+                
+                # Sort by TIME_PERIOD and STANDARD_REVENUE
+                df_pivot = df_pivot.sort_values(['TIME_PERIOD', 'STANDARD_REVENUE'])
+                
+                print(f"  Tax revenues format: TIME_PERIOD, STANDARD_REVENUE, {len([col for col in df_pivot.columns if col not in ['TIME_PERIOD', 'STANDARD_REVENUE']])} countries")
+            else:
+                # For population and GDP data, simple pivot
+                df_pivot = df.pivot_table(
+                    index='TIME_PERIOD',
+                    columns='REF_AREA',
+                    values='value',
+                    aggfunc='first'  # Take the first value if there are duplicates
+                )
+                
+                # Reset index to make TIME_PERIOD a regular column
+                df_pivot = df_pivot.reset_index()
+                
+                # Sort by TIME_PERIOD
+                df_pivot = df_pivot.sort_values('TIME_PERIOD')
+            
+            # Save the 2D data (overwriting the original file)
+            df_pivot.to_csv(output_path, index=False)
+            
+            print(f"  Original shape: {df.shape}")
+            print(f"  2D shape: {df_pivot.shape}")
+            print(f"  Years: {df_pivot['TIME_PERIOD'].min()} to {df_pivot['TIME_PERIOD'].max()}")
+            if 'STANDARD_REVENUE' in df_pivot.columns:
+                print(f"  Revenue types: {df_pivot['STANDARD_REVENUE'].nunique()}")
+            print(f"  Countries: {len([col for col in df_pivot.columns if col not in ['TIME_PERIOD', 'STANDARD_REVENUE']])}")
+            print(f"  Saved to: {output_path}")
+            
+        except Exception as e:
+            print(f"Error processing {filtered_file}: {e}")
 
 def main():
     """Main function to execute the script."""
@@ -336,6 +346,9 @@ def main():
         
         # Remove columns with single unique values
         remove_single_value_columns(common_countries)
+        
+        # Convert filtered data to 2D format
+        convert_to_2d_format()
     else:
         print("No common countries found or error occurred.")
 

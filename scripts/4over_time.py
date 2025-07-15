@@ -2,12 +2,11 @@
 """
 Script to create all 2D CSV files for tax rates, GDP per capita, and GDP per capita growth rates.
 
-This script combines the functionality of:
-1. create_tax_rate_2d_csvs.py - Creates 2D CSV files for each tax rate type
-2. gdp_per_capita.py - Computes GDP per capita by dividing GDP by population
-3. gdp_per_capita_growth_rates.py - Computes GDP per capita growth rates
+This script processes the labeled data which is already in 2D format:
+1. GDP per capita - Divides GDP by population for each country
+2. Tax rate types - Separates different tax types from the tax revenues data
+3. GDP per capita growth rates - Computes year-over-year growth rates
 
-The script processes data in the correct order to ensure dependencies are met.
 All output files are stored in results/year_country/ directory structure.
 """
 
@@ -16,11 +15,11 @@ import numpy as np
 import os
 from pathlib import Path
 
-def create_2d_tax_rate_csvs():
-    """Create 2D CSV files for each tax rate type."""
+def separate_tax_types():
+    """Separate different tax types from the tax revenues data."""
     
     print("\n" + "="*60)
-    print("STEP 1: Creating 2D CSV files for tax rate types")
+    print("STEP 1: Separating tax rate types from tax revenues data")
     print("="*60)
     
     # Read the labeled tax revenues data
@@ -33,61 +32,74 @@ def create_2d_tax_rate_csvs():
     # Create output directory if it doesn't exist
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     
-    # Get unique tax rate types
-    tax_rate_types = df['STANDARD_REVENUE'].unique()
-    print(f"Found {len(tax_rate_types)} tax rate types:")
-    for i, tax_type in enumerate(tax_rate_types, 1):
+    print(f"Data shape: {df.shape}")
+    print(f"Columns: {list(df.columns)}")
+    
+    # Get unique tax types from the STANDARD_REVENUE column
+    tax_types = df['STANDARD_REVENUE'].unique()
+    
+    print(f"Found {len(tax_types)} tax rate types:")
+    for i, tax_type in enumerate(tax_types, 1):
         print(f"  {i}. {tax_type}")
     
+    # Get country columns (all columns except TIME_PERIOD and STANDARD_REVENUE)
+    country_columns = [col for col in df.columns if col not in ['TIME_PERIOD', 'STANDARD_REVENUE']]
+    print(f"Number of countries: {len(country_columns)}")
+    
     # Process each tax rate type
-    for tax_type in tax_rate_types:
+    for tax_type in tax_types:
         print(f"\nProcessing: {tax_type}")
         
-        # Filter data for this tax rate type
+        # Filter data for this tax type
         tax_data = df[df['STANDARD_REVENUE'] == tax_type].copy()
         
         if tax_data.empty:
             print(f"  No data found for {tax_type}")
             continue
         
-        # Create pivot table: years as rows, countries as columns
-        pivot_table = tax_data.pivot_table(
-            index='TIME_PERIOD',
-            columns='REF_AREA',
-            values='value',
-            aggfunc='first'  # Take first value if duplicates exist
-        )
+        # Drop the STANDARD_REVENUE column since we're separating by tax type
+        tax_data = tax_data.drop('STANDARD_REVENUE', axis=1)
+        
+        # Set TIME_PERIOD as index for easier processing
+        tax_data = tax_data.set_index('TIME_PERIOD')
         
         # Sort by year
-        pivot_table = pivot_table.sort_index()
+        tax_data = tax_data.sort_index()
+        
+        # Sort columns alphabetically (TIME_PERIOD will be first when we reset index)
+        tax_data = tax_data.reindex(sorted(tax_data.columns), axis=1)
         
         # Create filename (sanitize the tax type name)
-        safe_tax_type = tax_type.replace(' ', '_').replace(',', '').replace('(', '').replace(')', '').replace('&', 'and')
+        safe_tax_type = tax_type.replace(' ', '_').replace(',', '').replace('(', '').replace(')', '').replace('&', 'and').replace('__', '_')
         filename = f"{safe_tax_type}.csv"
         filepath = os.path.join(output_dir, filename)
         
+        # Reset index to make TIME_PERIOD a regular column
+        tax_data = tax_data.reset_index()
+        
         # Save to CSV
-        pivot_table.to_csv(filepath)
+        tax_data.to_csv(filepath, index=False)
         
         print(f"  Created: {filepath}")
-        print(f"  Shape: {pivot_table.shape} (years: {len(pivot_table)}, countries: {len(pivot_table.columns)})")
-        print(f"  Year range: {pivot_table.index.min()} - {pivot_table.index.max()}")
-        print(f"  Countries: {len(pivot_table.columns)}")
+        print(f"  Shape: {tax_data.shape} (years: {len(tax_data)}, countries: {len(tax_data.columns)-1})")
+        print(f"  Year range: {tax_data['TIME_PERIOD'].min()} - {tax_data['TIME_PERIOD'].max()}")
+        print(f"  Countries: {len(tax_data.columns)-1}")
         
         # Show some statistics
-        print(f"  Data coverage: {pivot_table.notna().sum().sum()} / {pivot_table.size} cells ({pivot_table.notna().sum().sum() / pivot_table.size * 100:.1f}%)")
+        numeric_data = tax_data.drop('TIME_PERIOD', axis=1)
+        print(f"  Data coverage: {numeric_data.notna().sum().sum()} / {numeric_data.size} cells ({numeric_data.notna().sum().sum() / numeric_data.size * 100:.1f}%)")
         
         # Show top 5 countries by average tax rate
-        country_means = pivot_table.mean().sort_values(ascending=False)
+        country_means = numeric_data.mean().sort_values(ascending=False)
         print(f"  Top 5 countries by average rate:")
         for i, (country, mean_rate) in enumerate(country_means.head().items(), 1):
             print(f"    {i}. {country}: {mean_rate:.2f}%")
     
-    print(f"\nAll 2D CSV files created in: {output_dir}")
+    print(f"\nAll tax rate files created in: {output_dir}")
 
 def compute_gdp_per_capita():
     """
-    Compute GDP per capita by dividing GDP by population for matching time periods and countries.
+    Compute GDP per capita by dividing GDP by population for each country.
     """
     print("\n" + "="*60)
     print("STEP 2: Computing GDP per capita")
@@ -118,56 +130,66 @@ def compute_gdp_per_capita():
     population_df = pd.read_csv(population_file)
     print(f"Population data shape: {population_df.shape}")
     
-    # Rename value columns to be more specific
-    gdp_df = gdp_df.rename(columns={'value': 'gdp_value'})
-    population_df = population_df.rename(columns={'value': 'population_value'})
+    # Set TIME_PERIOD as index for both datasets
+    gdp_df = gdp_df.set_index('TIME_PERIOD')
+    population_df = population_df.set_index('TIME_PERIOD')
     
-    # Merge the datasets on TIME_PERIOD and REF_AREA
-    print("Merging GDP and population data...")
-    merged_df = pd.merge(
-        gdp_df, 
-        population_df, 
-        on=['TIME_PERIOD', 'REF_AREA'], 
-        how='inner'
-    )
+    # Get common countries (columns that exist in both datasets)
+    gdp_countries = set(gdp_df.columns)
+    population_countries = set(population_df.columns)
+    common_countries = gdp_countries.intersection(population_countries)
     
-    print(f"Merged data shape: {merged_df.shape}")
+    print(f"Common countries between GDP and population: {len(common_countries)}")
     
-    # Compute GDP per capita
+    # Compute GDP per capita for common countries
     print("Computing GDP per capita...")
-    merged_df['gdp_per_capita'] = merged_df['gdp_value'] / merged_df['population_value']
+    gdp_per_capita_df = pd.DataFrame(index=gdp_df.index)
     
-    # Create the output dataframe with the required columns
-    result_df = merged_df[['TIME_PERIOD', 'REF_AREA', 'gdp_per_capita']].copy()
-    result_df = result_df.rename(columns={'gdp_per_capita': 'value'})
+    for country in common_countries:
+        gdp_per_capita_df[country] = gdp_df[country] / population_df[country]
     
-    # Sort by time period and country for better readability
-    result_df = result_df.sort_values(['TIME_PERIOD', 'REF_AREA'])
+    # Sort by year
+    gdp_per_capita_df = gdp_per_capita_df.sort_index()
     
-    # Pivot the data to create a 2D format with years as rows and countries as columns
-    print("Creating 2D format with years as rows and countries as columns...")
-    pivot_df = result_df.pivot(index='TIME_PERIOD', columns='REF_AREA', values='value')
+    # Sort columns alphabetically
+    gdp_per_capita_df = gdp_per_capita_df.reindex(sorted(gdp_per_capita_df.columns), axis=1)
     
     # Reset index to make TIME_PERIOD a regular column
-    pivot_df = pivot_df.reset_index()
+    gdp_per_capita_df = gdp_per_capita_df.reset_index()
     
     # Save the result
     print(f"Saving GDP per capita data to {output_file}...")
-    pivot_df.to_csv(output_file, index=False)
+    gdp_per_capita_df.to_csv(output_file, index=False)
 
     # Print summary statistics
     print("\nSummary of GDP per capita computation:")
-    print(f"Total records: {len(result_df)}")
-    print(f"Time period range: {result_df['TIME_PERIOD'].min()} - {result_df['TIME_PERIOD'].max()}")
-    print(f"Number of countries: {result_df['REF_AREA'].nunique()}")
-    print(f"GDP per capita range: {result_df['value'].min():.2f} - {result_df['value'].max():.2f}")
-    print(f"2D format shape: {pivot_df.shape} (rows: time periods, columns: countries + 1)")
+    print(f"Total time periods: {len(gdp_per_capita_df)}")
+    print(f"Time period range: {gdp_per_capita_df['TIME_PERIOD'].min()} - {gdp_per_capita_df['TIME_PERIOD'].max()}")
+    print(f"Number of countries: {len(common_countries)}")
+    
+    # Calculate overall statistics (excluding NaN values)
+    numeric_data = gdp_per_capita_df.drop('TIME_PERIOD', axis=1)
+    all_values = numeric_data.values.flatten()
+    valid_values = all_values[~np.isnan(all_values)]
+    
+    print(f"GDP per capita range: {valid_values.min():.2f} - {valid_values.max():.2f}")
+    print(f"Average GDP per capita: {valid_values.mean():.2f}")
+    print(f"Median GDP per capita: {np.median(valid_values):.2f}")
+    print(f"Standard deviation: {valid_values.std():.2f}")
     
     # Show some sample data
-    print("\nSample GDP per capita data (2D format):")
-    print(pivot_df.head(10))
+    print("\nSample GDP per capita data:")
+    print(gdp_per_capita_df.head(10))
     
-    return pivot_df
+    # Show countries with highest and lowest average GDP per capita
+    print("\nCountries with highest average GDP per capita:")
+    avg_gdp_by_country = numeric_data.mean().sort_values(ascending=False)
+    print(avg_gdp_by_country.head(10))
+    
+    print("\nCountries with lowest average GDP per capita:")
+    print(avg_gdp_by_country.tail(10))
+    
+    return gdp_per_capita_df
 
 def compute_gdp_per_capita_growth_rates():
     """
@@ -203,6 +225,9 @@ def compute_gdp_per_capita_growth_rates():
     # Calculate year-over-year growth rates
     print("Computing year-over-year growth rates...")
     growth_rates_df = gdp_per_capita_df.pct_change() * 100
+    
+    # Sort columns alphabetically
+    growth_rates_df = growth_rates_df.reindex(sorted(growth_rates_df.columns), axis=1)
     
     # Reset index to make TIME_PERIOD a regular column
     growth_rates_df = growth_rates_df.reset_index()
@@ -240,8 +265,6 @@ def compute_gdp_per_capita_growth_rates():
     
     return growth_rates_df
 
-
-
 def create_all_2d_tables():
     """
     Main function to create all 2D tables in the correct order.
@@ -254,8 +277,8 @@ def create_all_2d_tables():
     print("All files will be stored in results/year_country/ directory structure")
     
     try:
-        # Step 1: Create tax rate 2D CSV files
-        create_2d_tax_rate_csvs()
+        # Step 1: Separate tax rate types
+        separate_tax_types()
         
         # Step 2: Compute GDP per capita
         gdp_per_capita_df = compute_gdp_per_capita()
