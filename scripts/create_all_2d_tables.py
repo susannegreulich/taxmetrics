@@ -240,217 +240,7 @@ def compute_gdp_per_capita_growth_rates():
     
     return growth_rates_df
 
-def create_summary_markdown_report():
-    """
-    Create a comprehensive markdown report with summary statistics for all created CSV tables.
-    """
-    print("\n" + "="*60)
-    print("STEP 4: Creating Summary Statistics Markdown Report")
-    print("="*60)
-    
-    output_dir = Path("results/year_country")
-    report_file = output_dir / "summary_statistics_report.md"
-    
-    # Ensure output directory exists
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Initialize markdown content
-    md_content = []
-    md_content.append("# 2D Tables Summary Statistics Report")
-    md_content.append("")
-    md_content.append(f"*Generated on: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}*")
-    md_content.append("")
-    md_content.append("## Overview")
-    md_content.append("")
-    md_content.append("This report provides summary statistics for all 2D CSV tables created by the data processing pipeline.")
-    md_content.append("")
-    
-    # Get all CSV files in the results directory
-    csv_files = list(output_dir.glob("*.csv"))
-    csv_files.sort()
-    
-    md_content.append(f"## Files Analyzed ({len(csv_files)} total)")
-    md_content.append("")
-    for i, file in enumerate(csv_files, 1):
-        md_content.append(f"{i}. `{file.name}`")
-    md_content.append("")
-    
-    # Process each CSV file
-    for csv_file in csv_files:
-        print(f"Analyzing: {csv_file.name}")
-        
-        try:
-            df = pd.read_csv(csv_file)
-            
-            # Add file section header
-            md_content.append(f"## {csv_file.name}")
-            md_content.append("")
-            
-            # Basic file information
-            md_content.append("### File Information")
-            md_content.append("")
-            md_content.append(f"- **File size**: {csv_file.stat().st_size / 1024:.1f} KB")
-            md_content.append(f"- **Shape**: {df.shape[0]} rows × {df.shape[1]} columns")
-            md_content.append("")
-            
-            # Time period information (if TIME_PERIOD column exists)
-            if 'TIME_PERIOD' in df.columns:
-                time_periods = df['TIME_PERIOD'].dropna()
-                if len(time_periods) > 0:
-                    md_content.append("### Time Period Coverage")
-                    md_content.append("")
-                    md_content.append(f"- **Year range**: {time_periods.min()} - {time_periods.max()}")
-                    md_content.append(f"- **Total years**: {len(time_periods.unique())}")
-                    md_content.append("")
-            
-            # Country information (all columns except TIME_PERIOD)
-            country_columns = [col for col in df.columns if col != 'TIME_PERIOD']
-            md_content.append("### Geographic Coverage")
-            md_content.append("")
-            md_content.append(f"- **Number of countries/regions**: {len(country_columns)}")
-            md_content.append("")
-            
-            # Data quality statistics
-            md_content.append("### Data Quality")
-            md_content.append("")
-            
-            # Calculate data coverage for each country
-            if 'TIME_PERIOD' in df.columns:
-                data_coverage = []
-                for col in country_columns:
-                    coverage = df[col].notna().sum() / len(df) * 100
-                    data_coverage.append((col, coverage))
-                
-                # Sort by coverage
-                data_coverage.sort(key=lambda x: x[1], reverse=True)
-                
-                md_content.append("#### Data Coverage by Country (Top 10)")
-                md_content.append("")
-                md_content.append("| Country | Coverage (%) |")
-                md_content.append("|---------|-------------|")
-                for country, coverage in data_coverage[:10]:
-                    # Ensure consistent column widths
-                    country_col = f"{country:<30}"  # Left-align with 30 chars width
-                    coverage_col = f"{coverage:>8.1f}%"  # Right-align with 8 chars width
-                    md_content.append(f"| {country_col} | {coverage_col} |")
-                md_content.append("")
-                
-                # Overall statistics
-                total_cells = df[country_columns].size
-                filled_cells = df[country_columns].notna().sum().sum()
-                overall_coverage = filled_cells / total_cells * 100
-                
-                md_content.append(f"- **Overall data coverage**: {overall_coverage:.1f}% ({filled_cells:,} / {total_cells:,} cells)")
-                md_content.append("")
-            
-            # Statistical summary for numerical data
-            md_content.append("### Statistical Summary")
-            md_content.append("")
-            
-            # Get numerical columns (exclude TIME_PERIOD)
-            numerical_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-            if 'TIME_PERIOD' in numerical_cols:
-                numerical_cols.remove('TIME_PERIOD')
-            
-            if numerical_cols:
-                # Calculate statistics across all numerical columns
-                all_values = df[numerical_cols].values.flatten()
-                valid_values = all_values[~np.isnan(all_values)]
-                
-                if len(valid_values) > 0:
-                    md_content.append("| Statistic | Value |")
-                    md_content.append("|-----------|-------|")
-                    md_content.append(f"| Count | {len(valid_values):>10,} |")
-                    md_content.append(f"| Mean | {np.mean(valid_values):>10.2f} |")
-                    md_content.append(f"| Median | {np.median(valid_values):>10.2f} |")
-                    md_content.append(f"| Std Dev | {np.std(valid_values):>10.2f} |")
-                    md_content.append(f"| Min | {np.min(valid_values):>10.2f} |")
-                    md_content.append(f"| Max | {np.max(valid_values):>10.2f} |")
-                    md_content.append(f"| 25th Percentile | {np.percentile(valid_values, 25):>10.2f} |")
-                    md_content.append(f"| 75th Percentile | {np.percentile(valid_values, 75):>10.2f} |")
-                    md_content.append("")
-                    
-                    # Special analysis for specific file types
-                    if "gdp_per_capita" in csv_file.name.lower():
-                        md_content.append("#### GDP per Capita Analysis")
-                        md_content.append("")
-                        md_content.append("| Country | Average GDP per Capita |")
-                        md_content.append("|---------|----------------------|")
-                        country_means = df[country_columns].mean().sort_values(ascending=False)
-                        for country, mean_val in country_means.head(10).items():
-                            # Ensure consistent column widths
-                            country_col = f"{country:<30}"  # Left-align with 30 chars width
-                            gdp_col = f"{mean_val:>15.2f}"  # Right-align with 15 chars width
-                            md_content.append(f"| {country_col} | {gdp_col} |")
-                        md_content.append("")
-                        
-                    elif "growth_rates" in csv_file.name.lower():
-                        md_content.append("#### Growth Rate Analysis")
-                        md_content.append("")
-                        md_content.append("| Country | Average Growth Rate (%) |")
-                        md_content.append("|---------|----------------------|")
-                        country_means = df[country_columns].mean().sort_values(ascending=False)
-                        for country, mean_val in country_means.head(10).items():
-                            # Ensure consistent column widths
-                            country_col = f"{country:<30}"  # Left-align with 30 chars width
-                            growth_col = f"{mean_val:>15.2f}%"  # Right-align with 15 chars width
-                            md_content.append(f"| {country_col} | {growth_col} |")
-                        md_content.append("")
-                        
-                        md_content.append("| Country | Average Growth Rate (%) |")
-                        md_content.append("|---------|----------------------|")
-                        for country, mean_val in country_means.tail(10).items():
-                            # Ensure consistent column widths
-                            country_col = f"{country:<30}"  # Left-align with 30 chars width
-                            growth_col = f"{mean_val:>15.2f}%"  # Right-align with 15 chars width
-                            md_content.append(f"| {country_col} | {growth_col} |")
-                        md_content.append("")
-                        
-                    else:
-                        # For tax rate files
-                        md_content.append("#### Tax Rate Analysis")
-                        md_content.append("")
-                        md_content.append("| Country | Average Rate (%) |")
-                        md_content.append("|---------|----------------|")
-                        country_means = df[country_columns].mean().sort_values(ascending=False)
-                        for country, mean_val in country_means.head(10).items():
-                            # Ensure consistent column widths
-                            country_col = f"{country:<30}"  # Left-align with 30 chars width
-                            rate_col = f"{mean_val:>10.2f}%"  # Right-align with 10 chars width
-                            md_content.append(f"| {country_col} | {rate_col} |")
-                        md_content.append("")
-            
-            md_content.append("---")
-            md_content.append("")
-            
-        except Exception as e:
-            print(f"Error analyzing {csv_file.name}: {e}")
-            md_content.append(f"## {csv_file.name}")
-            md_content.append("")
-            md_content.append(f"*Error reading file: {str(e)}*")
-            md_content.append("")
-            md_content.append("---")
-            md_content.append("")
-    
-    # Add summary section
-    md_content.append("## Summary")
-    md_content.append("")
-    md_content.append(f"This report covers {len(csv_files)} CSV files containing 2D data tables.")
-    md_content.append("All files are stored in the `results/year_country/` directory.")
-    md_content.append("")
-    md_content.append("### File Types Created:")
-    md_content.append("")
-    md_content.append("1. **Tax Rate Files**: Individual CSV files for each tax rate type")
-    md_content.append("2. **GDP per Capita**: Combined GDP and population data")
-    md_content.append("3. **GDP per Capita Growth Rates**: Year-over-year percentage changes")
-    md_content.append("")
-    
-    # Write the markdown file
-    with open(report_file, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(md_content))
-    
-    print(f"Summary statistics report saved to: {report_file}")
-    return report_file
+
 
 def create_all_2d_tables():
     """
@@ -461,7 +251,6 @@ def create_all_2d_tables():
     print("1. Tax rate 2D CSV files (one for each tax type)")
     print("2. GDP per capita 2D CSV file")
     print("3. GDP per capita growth rates 2D CSV file")
-    print("4. Summary statistics markdown report")
     print("All files will be stored in results/year_country/ directory structure")
     
     try:
@@ -474,9 +263,6 @@ def create_all_2d_tables():
         # Step 3: Compute GDP per capita growth rates
         growth_rates_df = compute_gdp_per_capita_growth_rates()
         
-        # Step 4: Create summary statistics markdown report
-        report_file = create_summary_markdown_report()
-        
         print("\n" + "="*60)
         print("ALL 2D TABLES CREATED SUCCESSFULLY!")
         print("="*60)
@@ -484,7 +270,6 @@ def create_all_2d_tables():
         print("1. Tax rate files: results/year_country/")
         print("2. GDP per capita: results/year_country/gdp_per_capita.csv")
         print("3. GDP per capita growth rates: results/year_country/gdp_per_capita_growth_rates.csv")
-        print(f"4. Summary report: {report_file}")
         
         return True
         

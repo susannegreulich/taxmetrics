@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to create interactive HTML graphs for all 2D CSV files in the results directory.
+Script to create interactive HTML graphs for all 2D CSV files in the results/year_country directory.
 Creates graphs with all countries in different colors by default, plus dropdown buttons
 to select individual countries.
 """
@@ -232,6 +232,8 @@ def create_summary_dashboard():
     # Create summary table
     if summary_data:
         summary_df = pd.DataFrame(summary_data)
+        # Sort by Dataset column alphabetically
+        summary_df = summary_df.sort_values('Dataset')
         summary_file = year_country_dir / "dataset_summary.csv"
         summary_df.to_csv(summary_file, index=False)
         print(f"Created dataset summary: {summary_file}")
