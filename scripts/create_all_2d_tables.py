@@ -8,6 +8,7 @@ This script combines the functionality of:
 3. gdp_per_capita_growth_rates.py - Computes GDP per capita growth rates
 
 The script processes data in the correct order to ensure dependencies are met.
+All output files are stored in results/year_country/ directory structure.
 """
 
 import pandas as pd
@@ -24,7 +25,7 @@ def create_2d_tax_rate_csvs():
     
     # Read the labeled tax revenues data
     input_file = "data/labeled/tax_revenues_labeled.csv"
-    output_dir = "results/tax_rate_2d_csvs"
+    output_dir = "results/year_country"
     
     print(f"Reading data from {input_file}...")
     df = pd.read_csv(input_file)
@@ -123,7 +124,7 @@ def compute_gdp_per_capita():
     
     # Define file paths
     data_dir = Path("data/labeled")
-    results_dir = Path("results")
+    results_dir = Path("results/year_country")
     gdp_file = data_dir / "gdp_labeled.csv"
     population_file = data_dir / "population_labeled.csv"
     output_file = results_dir / "gdp_per_capita.csv"
@@ -135,7 +136,7 @@ def compute_gdp_per_capita():
         raise FileNotFoundError(f"Population file not found: {population_file}")
     
     # Ensure results directory exists
-    results_dir.mkdir(exist_ok=True)
+    results_dir.mkdir(parents=True, exist_ok=True)
     
     # Read the datasets
     print("Reading GDP data...")
@@ -206,7 +207,7 @@ def compute_gdp_per_capita_growth_rates():
     print("="*60)
     
     # Define file paths
-    results_dir = Path("results")
+    results_dir = Path("results/year_country")
     input_file = results_dir / "gdp_per_capita.csv"
     output_file = results_dir / "gdp_per_capita_growth_rates.csv"
     
@@ -215,7 +216,7 @@ def compute_gdp_per_capita_growth_rates():
         raise FileNotFoundError(f"GDP per capita file not found: {input_file}")
     
     # Ensure results directory exists
-    results_dir.mkdir(exist_ok=True)
+    results_dir.mkdir(parents=True, exist_ok=True)
     
     # Read the GDP per capita data
     print("Reading GDP per capita data...")
@@ -277,6 +278,7 @@ def create_all_2d_tables():
     print("1. Tax rate 2D CSV files (one for each tax type)")
     print("2. GDP per capita 2D CSV file")
     print("3. GDP per capita growth rates 2D CSV file")
+    print("All files will be stored in results/year_country/ directory structure")
     
     try:
         # Step 1: Create tax rate 2D CSV files
@@ -292,9 +294,9 @@ def create_all_2d_tables():
         print("ALL 2D TABLES CREATED SUCCESSFULLY!")
         print("="*60)
         print("\nSummary of created files:")
-        print("1. Tax rate files: results/tax_rate_2d_csvs/")
-        print("2. GDP per capita: results/gdp_per_capita.csv")
-        print("3. GDP per capita growth rates: results/gdp_per_capita_growth_rates.csv")
+        print("1. Tax rate files: results/year_country/")
+        print("2. GDP per capita: results/year_country/gdp_per_capita.csv")
+        print("3. GDP per capita growth rates: results/year_country/gdp_per_capita_growth_rates.csv")
         
         return True
         

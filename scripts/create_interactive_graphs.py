@@ -28,7 +28,7 @@ def create_interactive_graph(csv_file, output_dir, title_prefix="", y_axis_title
     
     # Get the filename without extension for the output HTML file
     csv_name = csv_file.stem
-    html_output_file = output_dir / f"{csv_name}_interactive.html"
+    html_output_file = output_dir / f"{csv_name}.html"
     
     # Prepare data for Plotly
     countries = list(df.columns)
@@ -116,43 +116,49 @@ def create_interactive_graph(csv_file, output_dir, title_prefix="", y_axis_title
 
 def create_all_interactive_graphs():
     """
-    Create interactive HTML graphs for all 2D CSV files in the results directory.
+    Create interactive HTML graphs for all 2D CSV files in the results/year_country directory.
     """
     results_dir = Path("results")
-    tax_rate_dir = results_dir / "tax_rate_2d_csvs"
+    year_country_dir = results_dir / "year_country"
     
     # Ensure results directory exists
     results_dir.mkdir(exist_ok=True)
     
-    # List of CSV files to process with their configurations
-    csv_configs = [
-        {
-            'file': results_dir / "gdp_per_capita.csv",
-            'title_prefix': "GDP per Capita",
-            'y_axis_title': "GDP per Capita"
-        },
-        {
-            'file': results_dir / "gdp_per_capita_growth_rates.csv",
-            'title_prefix': "GDP per Capita Growth Rate",
-            'y_axis_title': "Growth Rate (%)"
-        }
-    ]
+    # Check if year_country directory exists
+    if not year_country_dir.exists():
+        print(f"Warning: Directory {year_country_dir} does not exist")
+        return []
     
-    # Add tax rate CSV files
-    if tax_rate_dir.exists():
-        tax_csv_files = list(tax_rate_dir.glob("*.csv"))
-        for csv_file in tax_csv_files:
-            # Skip summary files
-            if "summary" in csv_file.name.lower() or "comparison" in csv_file.name.lower():
-                continue
-            
-            # Create a nice title from the filename
-            title = csv_file.stem.replace('_', ' ').title()
-            csv_configs.append({
-                'file': csv_file,
-                'title_prefix': title,
-                'y_axis_title': "Tax Rate (%)"
-            })
+    # Get all CSV files in the year_country directory
+    csv_files = list(year_country_dir.glob("*.csv"))
+    
+    if not csv_files:
+        print(f"No CSV files found in {year_country_dir}")
+        return []
+    
+    # Create configurations for all CSV files
+    csv_configs = []
+    for csv_file in csv_files:
+        # Create a nice title from the filename
+        title = csv_file.stem.replace('_', ' ').title()
+        
+        # Determine y-axis title based on file content
+        y_axis_title = "Value"  # Default
+        if "gdp" in csv_file.name.lower():
+            if "growth" in csv_file.name.lower():
+                y_axis_title = "Growth Rate (%)"
+            else:
+                y_axis_title = "GDP per Capita"
+        elif "tax" in csv_file.name.lower():
+            y_axis_title = "Tax Rate (%)"
+        elif "revenue" in csv_file.name.lower():
+            y_axis_title = "Revenue"
+        
+        csv_configs.append({
+            'file': csv_file,
+            'title_prefix': title,
+            'y_axis_title': y_axis_title
+        })
     
     # Process each CSV file
     created_files = []
@@ -167,7 +173,7 @@ def create_all_interactive_graphs():
             # Create the interactive graph
             html_file = create_interactive_graph(
                 csv_file=csv_file,
-                output_dir=results_dir,
+                output_dir=year_country_dir,
                 title_prefix=config['title_prefix'],
                 y_axis_title=config['y_axis_title']
             )
@@ -189,32 +195,14 @@ def create_summary_dashboard():
     Create a summary dashboard that shows key statistics for all datasets.
     """
     results_dir = Path("results")
-    tax_rate_dir = results_dir / "tax_rate_2d_csvs"
+    year_country_dir = results_dir / "year_country"
     
-    # Read main datasets
+    # Read datasets from year_country directory
     datasets = {}
     
-    # GDP per capita
-    gdp_file = results_dir / "gdp_per_capita.csv"
-    if gdp_file.exists():
-        gdp_df = pd.read_csv(gdp_file)
-        gdp_df = gdp_df.set_index('TIME_PERIOD')
-        datasets['GDP per Capita'] = gdp_df
-    
-    # GDP per capita growth rates
-    growth_file = results_dir / "gdp_per_capita_growth_rates.csv"
-    if growth_file.exists():
-        growth_df = pd.read_csv(growth_file)
-        growth_df = growth_df.set_index('TIME_PERIOD')
-        datasets['GDP Growth Rate (%)'] = growth_df
-    
-    # Tax rate datasets
-    if tax_rate_dir.exists():
-        tax_csv_files = list(tax_rate_dir.glob("*.csv"))
-        for csv_file in tax_csv_files:
-            if "summary" in csv_file.name.lower() or "comparison" in csv_file.name.lower():
-                continue
-            
+    if year_country_dir.exists():
+        csv_files = list(year_country_dir.glob("*.csv"))
+        for csv_file in csv_files:
             title = csv_file.stem.replace('_', ' ').title()
             df = pd.read_csv(csv_file)
             df = df.set_index('TIME_PERIOD')
@@ -244,7 +232,7 @@ def create_summary_dashboard():
     # Create summary table
     if summary_data:
         summary_df = pd.DataFrame(summary_data)
-        summary_file = results_dir / "dataset_summary.csv"
+        summary_file = year_country_dir / "dataset_summary.csv"
         summary_df.to_csv(summary_file, index=False)
         print(f"Created dataset summary: {summary_file}")
         
@@ -271,14 +259,14 @@ def create_summary_dashboard():
         </html>
         """
         
-        summary_html_file = results_dir / "dataset_summary.html"
+        summary_html_file = year_country_dir / "dataset_summary.html"
         with open(summary_html_file, 'w') as f:
             f.write(html_content)
         print(f"Created dataset summary HTML: {summary_html_file}")
 
 if __name__ == "__main__":
     try:
-        print("Creating interactive HTML graphs for all 2D CSV files...")
+        print("Creating interactive HTML graphs for all CSV files in results/year_country...")
         created_files = create_all_interactive_graphs()
         
         print("\nCreating summary dashboard...")
