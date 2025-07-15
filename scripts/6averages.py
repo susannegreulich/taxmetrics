@@ -63,11 +63,11 @@ def main():
     files_to_process = {
         "GDP per capita": "gdp_per_capita.csv",
         "GDP per capita growth rates": "gdp_per_capita_growth_rates.csv",
-        "Total tax revenue": "Total_tax_revenue.csv",
-        "Taxes on goods and services": "Taxes_on_goods_and_services.csv",
-        "Taxes on income, profits, and capital gains": "Taxes_on_income_profits_and_capital_gains_of_individuals_and_corporations.csv",
-        "Taxes on property": "Taxes_on_property.csv",
-        "Social security contributions (SSC)": "Social_security_contributions_SSC.csv"
+        "Total tax revenue": "total_tax.csv",
+        "Taxes on goods and services": "goods_tax.csv",
+        "Taxes on income, profits, and capital gains": "income_tax.csv",
+        "Taxes on property": "property_tax.csv",
+        "Social security contributions": "social_security.csv"
     }
     
     # Create output directory

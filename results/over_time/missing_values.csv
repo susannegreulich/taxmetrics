@@ -1,72 +1,72 @@
-,Taxes On Income Profits And Capital Gains Of Individuals And Corporations,Gdp Per Capita,Taxes On Goods And Services,Total Tax Revenue,Gdp Per Capita Growth Rates,Social Security Contributions Ssc,Taxes On Property
-Zambia,23,18,23,23,17,34,23
-Hong Kong (China),20,0,20,20,1,20,20
-China (People’s Republic of),17,0,17,17,1,29,17
-Morocco,11,18,11,11,18,11,11
-Madagascar,4,19,4,4,18,22,4
-Georgia,5,20,5,5,21,5,5
-Indonesia,7,4,7,7,4,25,7
-Senegal,8,10,8,8,10,8,8
-Singapore,10,0,10,10,1,10,10
-Cabo Verde,1,19,1,1,18,1,1
-Croatia,6,5,6,6,6,6,6
-Romania,6,5,6,6,6,6,6
-Malta,5,6,5,5,6,5,5
-Latvia,5,5,5,5,6,5,5
-Israel,5,5,5,5,6,5,5
-Lithuania,5,5,5,5,6,5,5
-Slovenia,5,5,5,5,6,5,5
-Bulgaria,5,5,5,5,6,5,5
-Estonia,5,3,5,5,4,5,5
-Slovak Republic,5,2,5,5,3,5,5
-Argentina,0,14,0,0,15,0,0
-Cameroon,4,3,4,4,4,4,4
-Czechia,3,0,3,3,1,3,3
-Brazil,0,7,0,0,6,0,0
-Hungary,1,1,1,1,2,1,1
-South Africa,1,0,1,1,1,1,1
-Poland,1,0,1,1,1,1,1
-Australia,1,0,1,1,1,1,1
-Costa Rica,0,1,0,0,2,0,0
-Japan,0,0,0,1,1,1,0
-Germany,0,0,0,0,1,0,0
-Greece,0,0,0,0,1,0,0
-Belgium,0,0,0,0,1,0,0
-Austria,0,0,0,0,1,0,0
-Finland,0,0,0,0,1,0,0
-France,0,0,0,0,1,0,0
-Colombia,0,0,0,0,1,0,0
-Chile,0,0,0,0,1,0,0
-Canada,0,0,0,0,1,0,0
-Denmark,0,0,0,0,1,0,0
-New Zealand,0,0,0,0,1,0,0
-Netherlands,0,0,0,0,1,0,0
-Mexico,0,0,0,0,1,0,0
-Luxembourg,0,0,0,0,1,0,0
-Ireland,0,0,0,0,1,0,0
-Iceland,0,0,0,0,1,0,0
-Italy,0,0,0,0,1,0,0
-Korea,0,0,0,0,1,0,0
-Norway,0,0,0,0,1,0,0
-Portugal,0,0,0,0,1,0,0
-Sweden,0,0,0,0,1,0,0
-Spain,0,0,0,0,1,0,0
-Switzerland,0,0,0,0,1,0,0
-Türkiye,0,0,0,0,1,0,0
-United Kingdom,0,0,0,0,1,0,0
-United States,0,0,0,0,1,0,0
-TOTAL_MISSING,169,180,169,170,224,229,169
-Total Datasets Analyzed,7,7,7,7,7,7,7
-Total Countries,56,56,56,56,56,56,56
-Total Missing Values Across All Datasets,1310,1310,1310,1310,1310,1310,1310
-Top_Countries_Header,Countries with most missing values,,,,,,
-Top_1_Country,Zambia,161,,,,,
-Top_2_Country,Hong Kong (China),101,,,,,
-Top_3_Country,China (People’s Republic of),98,,,,,
-Top_4_Country,Morocco,91,,,,,
-Top_5_Country,Madagascar,75,,,,,
-Top_6_Country,Georgia,66,,,,,
-Top_7_Country,Indonesia,61,,,,,
-Top_8_Country,Senegal,60,,,,,
-Top_9_Country,Singapore,51,,,,,
-Top_10_Country,Cabo Verde,42,,,,,
+,Total Tax,Gdp Per Capita
+Zambia,23,18
+Morocco,11,18
+Georgia,5,20
+Madagascar,4,19
+Hong Kong (China),20,0
+Cabo Verde,1,19
+Senegal,8,10
+China (People’s Republic of),17,0
+Argentina,0,14
+Malta,5,6
+Romania,6,5
+Indonesia,7,4
+Croatia,6,5
+Lithuania,5,5
+Israel,5,5
+Singapore,10,0
+Slovenia,5,5
+Latvia,5,5
+Bulgaria,5,5
+Estonia,5,3
+Brazil,0,7
+Cameroon,4,3
+Slovak Republic,5,2
+Czechia,3,0
+Hungary,1,1
+South Africa,1,0
+Costa Rica,0,1
+Australia,1,0
+Poland,1,0
+Japan,1,0
+Germany,0,0
+Greece,0,0
+Belgium,0,0
+Austria,0,0
+Finland,0,0
+France,0,0
+Colombia,0,0
+Chile,0,0
+Canada,0,0
+Denmark,0,0
+New Zealand,0,0
+Netherlands,0,0
+Mexico,0,0
+Luxembourg,0,0
+Ireland,0,0
+Iceland,0,0
+Italy,0,0
+Korea,0,0
+Norway,0,0
+Portugal,0,0
+Sweden,0,0
+Spain,0,0
+Switzerland,0,0
+Türkiye,0,0
+United Kingdom,0,0
+United States,0,0
+TOTAL_MISSING,170,180
+Total Datasets Analyzed,2,2
+Total Countries,56,56
+Total Missing Values Across All Datasets,350,350
+Top_Countries_Header,Countries with most missing values,
+Top_1_Country,Zambia,41
+Top_2_Country,Morocco,29
+Top_3_Country,Georgia,25
+Top_4_Country,Madagascar,23
+Top_5_Country,Hong Kong (China),20
+Top_6_Country,Cabo Verde,20
+Top_7_Country,Senegal,18
+Top_8_Country,China (People’s Republic of),17
+Top_9_Country,Argentina,14
+Top_10_Country,Malta,11

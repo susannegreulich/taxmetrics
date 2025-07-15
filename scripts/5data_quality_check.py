@@ -21,22 +21,22 @@ def get_descriptive_stats():
     target_files = [
         "gdp_per_capita.csv",
         "gdp_per_capita_growth_rates.csv", 
-        "Total_tax_revenue.csv",
-        "Taxes_on_income_profits_and_capital_gains_of_individuals_and_corporations.csv",
-        "Taxes_on_goods_and_services.csv",
-        "Taxes_on_property.csv",
-        "Social_security_contributions_SSC.csv"
+        "total_tax.csv",
+        "income_tax.csv",
+        "goods_tax.csv",
+        "property_tax.csv",
+        "social_security.csv"
     ]
     
     # Define units for each dataset
     units_mapping = {
         "gdp_per_capita.csv": "PPP-adjusted USD",
         "gdp_per_capita_growth_rates.csv": "%",
-        "Total_tax_revenue.csv": "%",
-        "Taxes_on_income_profits_and_capital_gains_of_individuals_and_corporations.csv": "%",
-        "Taxes_on_goods_and_services.csv": "%",
-        "Taxes_on_property.csv": "%",
-        "Social_security_contributions_SSC.csv": "%"
+        "total_tax.csv": "%",
+        "income_tax.csv": "%",
+        "goods_tax.csv": "%",
+        "property_tax.csv": "%",
+        "social_security.csv": "%"
     }
     
     csv_files = [f for f in data_folder.glob("*.csv") if f.name in target_files]
@@ -110,12 +110,7 @@ def analyze_missing_values():
     # Define the specific CSV files to analyze for missing values
     target_files = [
         "gdp_per_capita.csv",
-        "gdp_per_capita_growth_rates.csv", 
-        "Total_tax_revenue.csv",
-        "Taxes_on_income_profits_and_capital_gains_of_individuals_and_corporations.csv",
-        "Taxes_on_goods_and_services.csv",
-        "Taxes_on_property.csv",
-        "Social_security_contributions_SSC.csv"
+        "total_tax.csv"
     ]
     csv_files = [f for f in data_folder.glob("*.csv") if f.name in target_files]
     

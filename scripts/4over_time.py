@@ -69,9 +69,21 @@ def separate_tax_types():
         # Sort columns alphabetically (TIME_PERIOD will be first when we reset index)
         tax_data = tax_data.reindex(sorted(tax_data.columns), axis=1)
         
-        # Create filename (sanitize the tax type name)
-        safe_tax_type = tax_type.replace(' ', '_').replace(',', '').replace('(', '').replace(')', '').replace('&', 'and').replace('__', '_')
-        filename = f"{safe_tax_type}.csv"
+        # Create filename using new naming convention
+        if tax_type == "Social security contributions (SSC)":
+            filename = "social_security.csv"
+        elif tax_type == "Taxes on goods and services":
+            filename = "goods_tax.csv"
+        elif tax_type == "Taxes on income, profits and capital gains of individuals and corporations":
+            filename = "income_tax.csv"
+        elif tax_type == "Taxes on property":
+            filename = "property_tax.csv"
+        elif tax_type == "Total tax revenue":
+            filename = "total_tax.csv"
+        else:
+            # Fallback for any other tax types
+            safe_tax_type = tax_type.replace(' ', '_').replace(',', '').replace('(', '').replace(')', '').replace('&', 'and').replace('__', '_')
+            filename = f"{safe_tax_type}.csv"
         filepath = os.path.join(output_dir, filename)
         
         # Reset index to make TIME_PERIOD a regular column

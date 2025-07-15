@@ -177,8 +177,20 @@ def create_all_interactive_graphs():
     # Create configurations for all time series CSV files
     csv_configs = []
     for csv_file in time_series_files:
-        # Create a nice title from the filename
-        title = csv_file.stem.replace('_', ' ').title()
+        # Create a nice title from the filename using new naming convention
+        if csv_file.stem == "social_security":
+            title = "Social Security"
+        elif csv_file.stem == "goods_tax":
+            title = "Taxes on Goods and Services"
+        elif csv_file.stem == "income_tax":
+            title = "Taxes on Income, Profits and Capital Gains"
+        elif csv_file.stem == "property_tax":
+            title = "Taxes on Property"
+        elif csv_file.stem == "total_tax":
+            title = "Total Tax Revenue"
+        else:
+            # Fallback for other files
+            title = csv_file.stem.replace('_', ' ').title()
         
         # Determine y-axis title based on file content
         y_axis_title = "Value"  # Default
@@ -238,10 +250,10 @@ def load_country_averages_data(file_path):
     # Clean the data - remove rows with missing values
     df = df.dropna()
     
-    # Also remove any rows where any tax column is 0 or negative (except for specific cases like SSC which can be 0)
+    # Also remove any rows where any tax column is 0 or negative (except for specific cases like social security which can be 0)
     tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates']]
     for col in tax_columns:
-        if col != 'Social security contributions (SSC)':  # SSC can legitimately be 0
+        if col != 'Social security contributions':  # Social security can legitimately be 0
             df = df[df[col] > 0]
     
     return df
@@ -387,8 +399,21 @@ def create_individual_tax_plots(df, output_dir):
                    transform=ax.transAxes, bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.9),
                    fontsize=12, fontweight='bold')
         
-        # Save individual plot
-        safe_filename = tax_col.replace(' ', '_').replace(',', '').replace('(', '').replace(')', '')
+        # Save individual plot with new naming convention
+        if tax_col == "Social security contributions":
+            safe_filename = "social_security"
+        elif tax_col == "Taxes on goods and services":
+            safe_filename = "goods_tax"
+        elif tax_col == "Taxes on income, profits, and capital gains":
+            safe_filename = "income_tax"
+        elif tax_col == "Taxes on property":
+            safe_filename = "property_tax"
+        elif tax_col == "Total tax revenue":
+            safe_filename = "total_tax"
+        else:
+            # Fallback for any other tax types
+            safe_filename = tax_col.replace(' ', '_').replace(',', '').replace('(', '').replace(')', '')
+        
         output_path = individual_dir / f'{safe_filename}_vs_gdp_growth.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close()
