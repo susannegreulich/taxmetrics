@@ -146,7 +146,9 @@ def compute_gdp_per_capita():
     gdp_per_capita_df = pd.DataFrame(index=gdp_df.index)
     
     for country in common_countries:
-        gdp_per_capita_df[country] = gdp_df[country] / population_df[country]
+        # GDP data is in millions, Population data is in thousands
+        # So 1mio/1000 = 1000, multiply by 1000 to get GDP/capita in unit of ONE USD PPP
+        gdp_per_capita_df[country] = (gdp_df[country] / population_df[country]) * 1000
     
     # Sort by year
     gdp_per_capita_df = gdp_per_capita_df.sort_index()

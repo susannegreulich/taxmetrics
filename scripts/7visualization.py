@@ -13,6 +13,22 @@ import plotly.offline as pyo
 from plotly.subplots import make_subplots
 import numpy as np
 
+def is_time_series_csv(csv_file):
+    """
+    Check if a CSV file contains time series data (has TIME_PERIOD column).
+    
+    Args:
+        csv_file (Path): Path to the CSV file
+        
+    Returns:
+        bool: True if the file contains time series data, False otherwise
+    """
+    try:
+        df = pd.read_csv(csv_file)
+        return 'TIME_PERIOD' in df.columns
+    except Exception:
+        return False
+
 def create_interactive_graph(csv_file, output_dir, title_prefix="", y_axis_title="Value"):
     """
     Create an interactive HTML graph for a 2D CSV file.
@@ -25,6 +41,11 @@ def create_interactive_graph(csv_file, output_dir, title_prefix="", y_axis_title
     """
     # Read the CSV file
     df = pd.read_csv(csv_file)
+    
+    # Check if this is a time series file
+    if 'TIME_PERIOD' not in df.columns:
+        print(f"Skipping {csv_file.name}: Not a time series file (no TIME_PERIOD column)")
+        return None
     
     # Get the filename without extension for the output HTML file
     csv_name = csv_file.stem
@@ -136,9 +157,18 @@ def create_all_interactive_graphs():
         print(f"No CSV files found in {year_country_dir}")
         return []
     
-    # Create configurations for all CSV files
+    # Filter for time series files only
+    time_series_files = [f for f in csv_files if is_time_series_csv(f)]
+    
+    print(f"Found {len(csv_files)} CSV files, {len(time_series_files)} are time series files")
+    
+    if not time_series_files:
+        print(f"No time series CSV files found in {year_country_dir}")
+        return []
+    
+    # Create configurations for all time series CSV files
     csv_configs = []
-    for csv_file in csv_files:
+    for csv_file in time_series_files:
         # Create a nice title from the filename
         title = csv_file.stem.replace('_', ' ').title()
         
@@ -177,7 +207,8 @@ def create_all_interactive_graphs():
                 title_prefix=config['title_prefix'],
                 y_axis_title=config['y_axis_title']
             )
-            created_files.append(html_file)
+            if html_file:
+                created_files.append(html_file)
             
         except Exception as e:
             print(f"Error creating graph for {csv_file}: {e}")
@@ -197,16 +228,21 @@ def create_summary_dashboard():
     results_dir = Path("results")
     year_country_dir = results_dir / "year_country"
     
-    # Read datasets from year_country directory
+    # Read datasets from year_country directory (only time series files)
     datasets = {}
     
     if year_country_dir.exists():
         csv_files = list(year_country_dir.glob("*.csv"))
-        for csv_file in csv_files:
+        time_series_files = [f for f in csv_files if is_time_series_csv(f)]
+        
+        for csv_file in time_series_files:
             title = csv_file.stem.replace('_', ' ').title()
-            df = pd.read_csv(csv_file)
-            df = df.set_index('TIME_PERIOD')
-            datasets[title] = df
+            try:
+                df = pd.read_csv(csv_file)
+                df = df.set_index('TIME_PERIOD')
+                datasets[title] = df
+            except Exception as e:
+                print(f"Error reading {csv_file}: {e}")
     
     # Create summary statistics
     summary_data = []
@@ -265,6 +301,8 @@ def create_summary_dashboard():
         with open(summary_html_file, 'w') as f:
             f.write(html_content)
         print(f"Created dataset summary HTML: {summary_html_file}")
+    else:
+        print("No time series datasets found for summary dashboard")
 
 if __name__ == "__main__":
     try:
