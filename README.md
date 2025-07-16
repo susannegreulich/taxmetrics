@@ -2,10 +2,6 @@
 
 A Python-based data analysis pipeline for examining the relationship between tax policies and economic performance using real OECD data from 1990-2023.
 
-## Project Overview
-
-This project analyzes the relationship between different types of taxation and economic growth across OECD countries. It fetches real data from OECD databases, processes it through a standardized pipeline, and generates interactive visualizations and statistical analyses to understand tax policy impacts.
-
 ## What It Does
 
 1. **Data Collection**: Fetches tax revenue, GDP, and population data from OECD SDMX APIs
@@ -13,13 +9,15 @@ This project analyzes the relationship between different types of taxation and e
 3. **Time Series Analysis**: Tracks tax rates and economic metrics over time (1990-2023)
 4. **Statistical Analysis**: Computes country averages and correlation analyses
 5. **Visualization**: Creates interactive HTML charts and scatter plots
+6. **Interpretation**: I make a short report interpreting the data, relating it to economic theory. The report
+is the markdown file in the results directory.
 
 ## Key Metrics Analyzed
 
-- **Tax Revenue Types**: Total tax, income tax, goods/services tax, property tax, social security
+- **Tax Revenue Types**: Total tax, income tax, goods/services tax, property tax, social security contributions
 - **Economic Indicators**: GDP per capita, GDP growth rates
 - **Time Period**: 1990-2023 across OECD countries
-- **Units**: Tax revenue as percentage of GDP, GDP per capita in USD PPP
+- **Units of data**: Tax revenues as percentage of GDP, GDP per capita in USD PPP current prices, population in persons.
 
 ## Project Structure
 
@@ -39,7 +37,8 @@ taxmetrics/
 │   └── labeled/       # Human-readable labeled data
 ├── results/           # Analysis outputs
 │   ├── over_time/     # Time series data and HTML charts
-│   └── averages/      # Country averages and correlation plots
+│   ├── averages/      # Country averages and correlation plots
+│   └── INTERPRETATION.md  # Economic analysis and findings report
 └── config/            # Configuration files
 ```
 
@@ -69,9 +68,7 @@ taxmetrics/
 ## Key Findings
 
 The analysis reveals relationships between:
-- **Tax Revenue vs GDP Growth**: Correlation between total tax burden and economic growth
-- **Tax Type Analysis**: Different impacts of income, goods, property, and social security taxes
-- **Country Comparisons**: Tax policy effectiveness across OECD nations
+- **Tax Revenues vs GDP Growth**: Correlation between tax burdens of various types and economic growth
 - **Temporal Trends**: How tax policies and economic performance evolved over 30+ years
 
 ## Data Sources
@@ -82,18 +79,18 @@ used the Developer API links for the data query and structure query. Below is a 
 tax link: https://data-explorer.oecd.org/vis?fs[0]=Topic%2C1%7CTaxation%23TAX%23%7CGlobal%20tax%20revenues%23TAX_GTR%23&pg=0&fc=Topic&bp=true&snb=155&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_REV_COMP_GLOBAL%40DF_RSGLOBAL&df[ag]=OECD.CTP.TPS&df[vs]=2.1&dq=..S13.T_5000%2BT_4000%2BT_2000%2BT_1000%2B_T..PT_B1GQ.A&to[TIME_PERIOD]=false&pd=1990%2C2023
 tax data query: https://sdmx.oecd.org/public/rest/data/OECD.CTP.TPS,DSD_REV_COMP_GLOBAL@DF_RSGLOBAL,2.1/..S13.T_5000+T_4000+T_2000+T_1000+_T..PT_B1GQ.A?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
 tax structure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.CTP.TPS/DSD_REV_COMP_GLOBAL@DF_RSGLOBAL/2.1?references=all
-unit of measurement: percentage of GDP
+unit of measurement of raw data: percentage of GDP
 
 # GDP link: https://data-explorer.oecd.org/vis?tm=annual%20gdp%20developer&pg=0&hc[Table%20identifier]=&snb=157&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE1&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A..S1..B1GQ._Z._Z._Z.USD_PPP.V.N.T0102&pd=1990%2C2023&to[TIME_PERIOD]=false
 data "https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,2.0/A..S1..B1GQ._Z._Z._Z.USD_PPP.V.N.T0102?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions"
 structure: 'https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE1/2.0?references=all',
-Unit of measurement: US dollars, PPP converted, Current prices, Millions
+Unit of measurement of raw data: US dollars, PPP converted, Current prices, Millions
 
 
 population: https://data-explorer.oecd.org/vis?tm=population&pg=0&hc[Transaction]=&snb=305&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_NAMAIN10%40DF_TABLE3&df[ag]=OECD.SDD.NAD&df[vs]=2.0&dq=A..S1.S1.POP.._Z..PS...&pd=1990%2C2023&to[TIME_PERIOD]=false
 data query: https://sdmx.oecd.org/public/rest/data/OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE3,2.0/A..S1.S1.POP.._Z..PS...?startPeriod=1990&endPeriod=2023&dimensionAtObservation=AllDimensions
 structure query: https://sdmx.oecd.org/public/rest/dataflow/OECD.SDD.NAD/DSD_NAMAIN10@DF_TABLE3/2.0?references=all
-Unit of measurement: one thousand persons
+Unit of measurement of raw data: one thousand persons
 
 
 ## Output Files
@@ -106,12 +103,14 @@ Unit of measurement: one thousand persons
 ### Statistical Analysis
 - Country averages across all time periods
 - Correlation coefficients between tax types and GDP growth
-- Descriptive statistics and data quality reports
+- Descriptive statistics
 
 ### Data Files
 - Cleaned CSV datasets ready for further analysis
 - Labeled data with human-readable categories
-- Missing value reports and data quality metrics
+- Data quality checks (missing values checks, checking whether value ranges are plausible). **The data quality
+checks revealed that only 32 countries have no missing values, whilst some had few missing values, and some had
+many. I decided to use the entire dataset for the analysis until further, but future work would improve the analysis by using homogeneous datasets, including only countries that have data for all metrics in all years. **
 
 ## Technical Details
 
@@ -125,5 +124,5 @@ Unit of measurement: one thousand persons
 
 - Using ONLY countries with zero missing values. 
 - Multiple linear regression, with GDP growth rate as dependent variable, and the 
-various tax rates as independent variables. 
+various tax rates as independent variables. See interpretation.md for more details.
 - Laffer curve analysis for optimal tax rates

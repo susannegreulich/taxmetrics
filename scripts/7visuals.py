@@ -198,11 +198,11 @@ def create_all_interactive_graphs():
             if "growth" in csv_file.name.lower():
                 y_axis_title = "Growth Rate (%)"
             else:
-                y_axis_title = "GDP per Capita"
-        elif "tax" in csv_file.name.lower():
-            y_axis_title = "Tax Rate (%)"
+                y_axis_title = "GDP per Capita (PPP-adjusted USD in current prices)"
+        elif "tax" in csv_file.name.lower() or "social_security" in csv_file.name.lower():
+            y_axis_title = "Tax Rate (% of GDP)"
         elif "revenue" in csv_file.name.lower():
-            y_axis_title = "Revenue"
+            y_axis_title = "Revenue (% of GDP)"
         
         csv_configs.append({
             'file': csv_file,
@@ -259,20 +259,23 @@ def load_country_averages_data(file_path):
     return df
 
 def create_tax_growth_scatter_plots(df, output_dir):
-    """Create scatter plots for GDP growth rates against each tax type."""
+    """Create scatter plots for GDP growth rates against each tax type and GDP per capita."""
     
     # Set up the plotting style
     plt.style.use('default')
     sns.set_palette("husl")
     
-    # Define tax columns (excluding GDP growth rates and Country)
-    tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates']]
+    # Define tax columns (excluding GDP growth rates, Country, and GDP per capita)
+    tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates', 'GDP per capita']]
+    
+    # Create a list of all plots: GDP per capita first, then tax types
+    all_plots = [('GDP per capita', 'GDP per capita')] + [(tax_col, tax_col) for tax_col in tax_columns]
     
     # Create a figure with subplots
     n_cols = 2
-    n_rows = (len(tax_columns) + 1) // 2
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5 * n_rows))
-    fig.suptitle('GDP Per Capita Growth Rates vs Tax Types (Country Averages)', 
+    n_rows = (len(all_plots) + 1) // 2
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 6 * n_rows))  # Made taller: 6 * n_rows instead of 5
+    fig.suptitle('GDP Per Capita Growth Rates vs Economic Indicators (Country Averages)', 
                  fontsize=16, fontweight='bold', y=0.98)
     
     # Flatten axes for easier iteration
@@ -280,39 +283,73 @@ def create_tax_growth_scatter_plots(df, output_dir):
         axes = axes.reshape(1, -1)
     axes = axes.flatten()
     
-    for idx, tax_col in enumerate(tax_columns):
+    for idx, (plot_name, column_name) in enumerate(all_plots):
         ax = axes[idx]
         
         # Create scatter plot
-        scatter = ax.scatter(df[tax_col], df['GDP per capita growth rates'], 
-                           alpha=0.7, s=60, edgecolors='black', linewidth=0.5)
-        
-        # Add country labels for points
-        for i, country in enumerate(df['Country']):
-            ax.annotate(country, (df[tax_col].iloc[i], df['GDP per capita growth rates'].iloc[i]),
-                       xytext=(5, 5), textcoords='offset points', fontsize=8, alpha=0.8)
-        
-        # Calculate correlation coefficient
-        correlation = df[tax_col].corr(df['GDP per capita growth rates'])
-        
-        # Add trend line (with error handling)
-        try:
-            z = np.polyfit(df[tax_col], df['GDP per capita growth rates'], 1)
-            p = np.poly1d(z)
-            ax.plot(df[tax_col], p(df[tax_col]), "r--", alpha=0.8, linewidth=2)
-        except (np.linalg.LinAlgError, ValueError) as e:
-            print(f"Warning: Could not fit trend line for {tax_col}: {e}")
-            correlation = np.nan
-        
-        # Customize the plot
-        ax.set_xlabel(f'{tax_col} (% of GDP)', fontsize=12, fontweight='bold')
-        ax.set_ylabel('GDP Per Capita Growth Rate (%)', fontsize=12, fontweight='bold')
-        if not np.isnan(correlation):
-            ax.set_title(f'{tax_col}\nCorrelation: {correlation:.3f}', 
-                        fontsize=11, fontweight='bold')
+        if plot_name == 'GDP per capita':
+            # GDP per capita vs growth rates plot
+            scatter = ax.scatter(df[column_name], df['GDP per capita growth rates'], 
+                               alpha=0.7, s=60, edgecolors='black', linewidth=0.5)
+            
+            # Add country labels for points
+            for i, country in enumerate(df['Country']):
+                ax.annotate(country, (df[column_name].iloc[i], df['GDP per capita growth rates'].iloc[i]),
+                           xytext=(5, 5), textcoords='offset points', fontsize=8, alpha=0.8)
+            
+            # Calculate correlation coefficient
+            correlation = df[column_name].corr(df['GDP per capita growth rates'])
+            
+            # Add trend line (with error handling)
+            try:
+                z = np.polyfit(df[column_name], df['GDP per capita growth rates'], 1)
+                p = np.poly1d(z)
+                ax.plot(df[column_name], p(df[column_name]), "r--", alpha=0.8, linewidth=2)
+            except (np.linalg.LinAlgError, ValueError) as e:
+                print(f"Warning: Could not fit trend line for {plot_name}: {e}")
+                correlation = np.nan
+            
+            # Customize the plot for GDP per capita
+            ax.set_xlabel('GDP per Capita (PPP-adjusted USD in current prices)', fontsize=12, fontweight='bold')
+            ax.set_ylabel('GDP Per Capita Growth Rate (%)', fontsize=12, fontweight='bold')
+            if not np.isnan(correlation):
+                ax.set_title(f'GDP per capita\nCorrelation: {correlation:.3f}', 
+                            fontsize=11, fontweight='bold')
+            else:
+                ax.set_title(f'GDP per capita\nCorrelation: N/A', 
+                            fontsize=11, fontweight='bold')
         else:
-            ax.set_title(f'{tax_col}\nCorrelation: N/A', 
-                        fontsize=11, fontweight='bold')
+            # Tax type vs growth rates plot
+            scatter = ax.scatter(df[column_name], df['GDP per capita growth rates'], 
+                               alpha=0.7, s=60, edgecolors='black', linewidth=0.5)
+            
+            # Add country labels for points
+            for i, country in enumerate(df['Country']):
+                ax.annotate(country, (df[column_name].iloc[i], df['GDP per capita growth rates'].iloc[i]),
+                           xytext=(5, 5), textcoords='offset points', fontsize=8, alpha=0.8)
+            
+            # Calculate correlation coefficient
+            correlation = df[column_name].corr(df['GDP per capita growth rates'])
+            
+            # Add trend line (with error handling)
+            try:
+                z = np.polyfit(df[column_name], df['GDP per capita growth rates'], 1)
+                p = np.poly1d(z)
+                ax.plot(df[column_name], p(df[column_name]), "r--", alpha=0.8, linewidth=2)
+            except (np.linalg.LinAlgError, ValueError) as e:
+                print(f"Warning: Could not fit trend line for {plot_name}: {e}")
+                correlation = np.nan
+            
+            # Customize the plot for tax types
+            ax.set_xlabel(f'{column_name} (% of GDP)', fontsize=12, fontweight='bold')
+            ax.set_ylabel('GDP Per Capita Growth Rate (%)', fontsize=12, fontweight='bold')
+            if not np.isnan(correlation):
+                ax.set_title(f'{column_name}\nCorrelation: {correlation:.3f}', 
+                            fontsize=11, fontweight='bold')
+            else:
+                ax.set_title(f'{column_name}\nCorrelation: N/A', 
+                            fontsize=11, fontweight='bold')
+        
         ax.grid(True, alpha=0.3)
         
         # Add correlation text
@@ -326,17 +363,17 @@ def create_tax_growth_scatter_plots(df, output_dir):
                    fontsize=10, fontweight='bold')
     
     # Hide empty subplots if any
-    for idx in range(len(tax_columns), len(axes)):
+    for idx in range(len(all_plots), len(axes)):
         axes[idx].set_visible(False)
     
-    # Adjust layout
+    # Adjust layout with more space for title
     plt.tight_layout()
-    plt.subplots_adjust(top=0.95)
+    plt.subplots_adjust(top=0.92)  # Reduced from 0.95 to give more space for title
     
     # Save the plot
-    output_path = output_dir / 'tax_growth_scatter_plots.png'
+    output_path = output_dir / 'all_scatter_plots.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"Scatter plots saved to: {output_path}")
+    print(f"Combined scatter plots saved to: {output_path}")
     
     # Show the plot
     plt.show()
@@ -349,8 +386,8 @@ def create_individual_tax_plots(df, output_dir):
     # Use the main output directory directly (no subfolder)
     individual_dir = output_dir
     
-    # Define tax columns
-    tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates']]
+    # Define tax columns (exclude GDP per capita as it's not a tax type)
+    tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates', 'GDP per capita']]
     
     for tax_col in tax_columns:
         # Create figure
@@ -422,9 +459,66 @@ def create_individual_tax_plots(df, output_dir):
     
     return individual_dir
 
+def create_gdp_per_capita_vs_growth_plot(df, output_dir):
+    """Create a scatter plot for GDP per capita vs GDP growth rates."""
+    
+    # Create figure
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    # Create scatter plot
+    scatter = ax.scatter(df['GDP per capita'], df['GDP per capita growth rates'], 
+                       alpha=0.7, s=80, edgecolors='black', linewidth=0.5, c='steelblue')
+    
+    # Add country labels
+    for i, country in enumerate(df['Country']):
+        ax.annotate(country, (df['GDP per capita'].iloc[i], df['GDP per capita growth rates'].iloc[i]),
+                   xytext=(5, 5), textcoords='offset points', fontsize=9, alpha=0.8)
+    
+    # Calculate correlation
+    correlation = df['GDP per capita'].corr(df['GDP per capita growth rates'])
+    
+    # Add trend line (with error handling)
+    try:
+        z = np.polyfit(df['GDP per capita'], df['GDP per capita growth rates'], 1)
+        p = np.poly1d(z)
+        ax.plot(df['GDP per capita'], p(df['GDP per capita']), "r--", alpha=0.8, linewidth=2, label='Trend line')
+    except (np.linalg.LinAlgError, ValueError) as e:
+        print(f"Warning: Could not fit trend line for GDP per capita vs growth rates: {e}")
+        correlation = np.nan
+    
+    # Customize plot with correct units
+    ax.set_xlabel('GDP per Capita (PPP-adjusted USD in current prices)', fontsize=14, fontweight='bold')
+    ax.set_ylabel('GDP Per Capita Growth Rate (%)', fontsize=14, fontweight='bold')
+    if not np.isnan(correlation):
+        ax.set_title(f'GDP Per Capita vs Growth Rates\nCorrelation: {correlation:.3f}', 
+                    fontsize=16, fontweight='bold')
+    else:
+        ax.set_title(f'GDP Per Capita vs Growth Rates\nCorrelation: N/A', 
+                    fontsize=16, fontweight='bold')
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+    
+    # Add correlation info
+    if not np.isnan(correlation):
+        ax.text(0.05, 0.95, f'Correlation coefficient: {correlation:.3f}', 
+               transform=ax.transAxes, bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.9),
+               fontsize=12, fontweight='bold')
+    else:
+        ax.text(0.05, 0.95, 'Correlation coefficient: N/A', 
+               transform=ax.transAxes, bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.9),
+               fontsize=12, fontweight='bold')
+    
+    # Save the plot
+    output_path = output_dir / 'GDP_per_capita_vs_gdp_growth.png'
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"GDP per capita vs growth rates plot saved: {output_path}")
+    return output_path
+
 def generate_tax_correlation_summary(df):
     """Generate summary statistics for correlations."""
-    tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates']]
+    tax_columns = [col for col in df.columns if col not in ['Country', 'GDP per capita growth rates', 'GDP per capita']]
     
     correlations = {}
     for tax_col in tax_columns:
@@ -466,6 +560,10 @@ def create_tax_growth_analysis():
     # Create individual plots
     print("\nCreating individual scatter plots...")
     create_individual_tax_plots(df, output_dir)
+    
+    # Create GDP per capita vs growth rates plot
+    print("\nCreating GDP per capita vs growth rates plot...")
+    create_gdp_per_capita_vs_growth_plot(df, output_dir)
     
     # Generate summary statistics
     print("\nGenerating summary statistics...")
